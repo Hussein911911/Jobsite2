@@ -3,269 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شركة الرافدين — موقع الوظائف (الرتب والسجلات)</title>
+<title>مكتب الفيض الدوائي العلمي — نظام إدارة الأدوية</title>
 <style>
   :root{
-    --navy:#123c5c; --navy2:#0e2f4a; --navy3:#0a2236;
-    --gold:#c9962e; --gold-dark:#a97a1e; --goldbg:#fbf3e0;
-    --green:#0e7a5f; --greenbg:#e4f4ee; --red:#b3443c; --redbg:#fbeceb;
-    --blue:#2563a8; --bluebg:#e8f0f9; --purple:#6b4fa0; --purplebg:#efe9f8;
-    --gray:#64748b; --graybg:#eef1f5;
-    --bg:#f4f7fa; --card:#fff; --line:#dfe7ee; --text:#22303c; --muted:#64748b;
-    --shadow:0 2px 12px rgba(14,47,74,.08);
+    --teal:#0e6e6e; --teal-dark:#0a5454; --teal-bg:#e3f2f2;
+    --navy:#123c5c; --navy2:#0e2f4a;
+    --gold:#c9962e; --gold-dark:#a97a1e; --gold-bg:#fbf3e0;
+    --green:#0e7a5f; --green-bg:#e4f4ee;
+    --red:#b3443c; --red-bg:#fbeceb;
+    --blue:#2563a8; --blue-bg:#e8f0f9;
+    --purple:#6b4fa0; --purple-bg:#efe9f8;
+    --gray:#64748b; --gray-bg:#eef1f5;
+    --bg:#f3f6f9; --card:#fff; --line:#dbe4ec; --text:#21303c; --muted:#64748b;
+    --shadow:0 2px 14px rgba(14,47,74,.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
-  body{background:var(--bg);color:var(--text);line-height:1.85;font-size:14.5px}
+  body{background:var(--bg);color:var(--text);line-height:1.75;font-size:14.5px}
   a{text-decoration:none;color:inherit}
-  .container{max-width:1100px;margin:0 auto;padding:0 18px}
+  .container{max-width:1180px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
 
   /* ===== الشريط العلوي ===== */
-  .pnav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:80;box-shadow:var(--shadow)}
-  .pnav .in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:10px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16.5px;color:var(--navy);cursor:pointer}
-  .brand .ico{width:38px;height:38px;background:var(--navy);color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:80;box-shadow:var(--shadow)}
+  .topbar .in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:10px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:16px;color:var(--navy)}
+  .brand .ico{width:40px;height:40px;background:var(--teal);color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px}
   .brand small{display:block;font-size:10.5px;color:var(--muted);font-weight:400}
-  .pnav nav{display:flex;gap:8px}
-  .navbtn{border:none;background:none;padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--muted);font-family:inherit;transition:.15s}
-  .navbtn:hover{background:var(--graybg);color:var(--navy)}
-  .navbtn.on{background:var(--navy);color:#fff}
-  .navbtn.gold{background:var(--gold);color:#fff}
-  .navbtn.gold:hover{background:var(--gold-dark)}
+  .topnav{display:flex;gap:7px;flex-wrap:wrap}
+  .tnav{border:none;background:none;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:700;color:var(--muted);transition:.15s}
+  .tnav:hover{background:var(--gray-bg);color:var(--navy)}
+  .tnav.on{background:var(--teal);color:#fff}
+  .userchip{display:flex;align-items:center;gap:8px;background:var(--teal-bg);color:var(--teal-dark);padding:6px 12px;border-radius:20px;font-size:12.5px;font-weight:700}
 
   /* ===== الهيرو ===== */
-  .hero{background:linear-gradient(135deg,var(--navy3),var(--navy) 55%,#1b5683);color:#fff;padding:52px 0 46px}
-  .hero h1{font-size:27px;margin-bottom:8px}
-  .hero p{opacity:.93;font-size:15px;max-width:640px}
-  .hero .stats{display:flex;gap:26px;margin-top:20px;flex-wrap:wrap}
-  .hero .st{text-align:center}
-  .hero .st b{font-size:22px;display:block;color:#ffd98a}
-  .hero .st span{font-size:12px;opacity:.85}
+  .hero{background:linear-gradient(135deg,var(--navy2),#0f4a5e 55%,var(--teal));color:#fff;padding:46px 0 40px}
+  .hero h1{font-size:26px;margin-bottom:8px}
+  .hero p{opacity:.93;font-size:14.5px;max-width:650px}
+  .hero .stats{display:flex;gap:22px;margin-top:20px;flex-wrap:wrap}
+  .hero .st{text-align:center;min-width:90px}
+  .hero .st b{font-size:22px;display:block;color:#ffe0a3}
+  .hero .st span{font-size:11.5px;opacity:.85}
+  .badge-hero{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:4px 13px;border-radius:20px;font-size:12px;margin-bottom:12px}
 
-  /* ===== الفلاتر ===== */
-  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 20px}
-  .filters input,.filters select{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--text)}
-  .filters input{flex:1;min-width:230px}
-  .filters select{min-width:180px}
-  .filters input:focus,.filters select:focus{outline:none;border-color:var(--navy)}
+  /* ===== البطاقات والأقسام ===== */
+  .grid{display:grid;gap:16px;margin:26px 0}
+  .g-4{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .g-2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}
+  .mcard:hover{transform:translateY(-3px);border-color:var(--teal)}
+  .mcard .ico{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:11px}
+  .mcard h3{font-size:15px;margin-bottom:4px}
+  .mcard p{font-size:12.5px;color:var(--muted)}
+  .teal-i{background:var(--teal-bg)}
+  .gold-i{background:var(--gold-bg)}
+  .green-i{background:var(--green-bg)}
+  .blue-i{background:var(--blue-bg)}
+  .purple-i{background:var(--purple-bg)}
 
-  /* ===== بطاقات الوظائف ===== */
-  .job-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(295px,1fr));gap:16px;margin-bottom:36px}
-  .jcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;transition:.2s;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);position:relative}
-  .jcard:hover{transform:translateY(-4px);border-color:var(--navy)}
-  .jcard .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .jcard h3{font-size:16px}
-  .jcard .meta{display:flex;flex-wrap:wrap;gap:7px;font-size:11.5px;color:var(--muted)}
-  .jcard .meta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:2px 10px}
-  .jcard .salary{font-weight:800;color:var(--navy);font-size:13px}
-  .jcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:9px;border-top:1px dashed var(--line)}
-  .emptystate{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:34px;text-align:center;color:var(--muted);grid-column:1/-1}
+  /* ===== اللوحة ===== */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .panel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+  .panel h3{font-size:15.5px;color:var(--navy)}
+  .rowf{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .fld{display:flex;flex-direction:column;gap:4px;min-width:150px}
+  .fld label{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .txt,.sel,.txtarea{padding:9px 12px;border:1.5px solid var(--line);border-radius:9px;background:#fff;font-size:13px;color:var(--text)}
+  .txt:focus,.sel:focus,.txtarea:focus{outline:none;border-color:var(--teal)}
+  .txtarea{resize:vertical;min-height:70px}
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.8px}
+  th{text-align:right;background:var(--navy);color:#fff;padding:9px 12px;font-size:11.8px;white-space:nowrap}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:middle}
+  tr:hover td{background:#f5fafb}
+  .pill{font-size:10.8px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap}
+  .p-ok{background:var(--green-bg);color:var(--green)}
+  .p-lw{background:var(--gold-bg);color:var(--gold-dark)}
+  .p-no{background:var(--red-bg);color:var(--red)}
+  .p-new{background:var(--blue-bg);color:var(--blue)}
+  .p-inf{background:var(--purple-bg);color:var(--purple)}
+  .p-gry{background:var(--gray-bg);color:var(--gray)}
 
-  /* ===== شارات الرتب ===== */
-  .rbadge{font-size:10.5px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap;border:1px solid transparent}
-  .r1{background:var(--goldbg);color:var(--gold-dark);border-color:#e7c98a}
-  .r2{background:var(--bluebg);color:var(--blue);border-color:#bcd6f0}
-  .r3{background:var(--greenbg);color:var(--green);border-color:#b5e0d2}
-  .r4{background:var(--purplebg);color:var(--purple);border-color:#d5c8ec}
-  .r5{background:var(--graybg);color:var(--gray);border-color:#d7dde4}
-
-  /* ===== أزرار ===== */
-  .btn{display:inline-block;padding:10px 20px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;transition:.15s}
-  .btn-navy{background:var(--navy);color:#fff}
-  .btn-navy:hover{background:var(--navy2)}
+  /* ===== الأزرار ===== */
+  .btn{display:inline-block;padding:9px 18px;border-radius:9px;border:none;font-size:13px;font-weight:700;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn-teal{background:var(--teal);color:#fff}
+  .btn-teal:hover{background:var(--teal-dark)}
   .btn-gold{background:var(--gold);color:#fff}
   .btn-gold:hover{background:var(--gold-dark)}
-  .btn-sm{padding:6px 13px;font-size:11.5px;border-radius:7px}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy2)}
   .btn-line{background:#fff;border:1.5px solid var(--line);color:var(--text)}
-  .btn-line:hover{border-color:var(--navy);color:var(--navy)}
-  .btn-danger{background:var(--redbg);color:var(--red);border:1px solid #eec9c5}
+  .btn-line:hover{border-color:var(--teal);color:var(--teal)}
+  .btn-danger{background:var(--red-bg);color:var(--red);border:1px solid #eec9c5}
   .btn-danger:hover{background:var(--red);color:#fff}
+  .btn-sm{padding:6px 12px;font-size:11.5px;border-radius:7px}
   .btn-green{background:var(--green);color:#fff}
   .btn-green:hover{background:#0b6450}
 
-  /* ===== تفاصيل الوظيفة + نموذج التسجيل ===== */
-  .detail{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:16px 0 36px;box-shadow:var(--shadow)}
-  .detail h1{font-size:21px;margin-bottom:8px;color:var(--navy)}
-  .dmeta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
-  .dmeta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 13px;font-size:12px;font-weight:700;color:var(--navy2)}
-  .detail h4{color:var(--navy);margin:13px 0 5px;font-size:14.5px}
-  .detail p{font-size:13.5px}
-  .apply{background:#fff;border:1.5px solid var(--navy);border-radius:14px;padding:20px 22px;margin-top:18px}
-  .apply h3{font-size:16px;margin-bottom:12px;color:var(--navy)}
-  .apply label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:9px 0 4px}
-  .apply input,.apply textarea{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-family:inherit;font-size:13.5px}
-  .apply input:focus,.apply textarea:focus{outline:none;border-color:var(--gold)}
-
-  /* ===== بوابة السجلات ===== */
-  .gate{min-height:50vh;display:flex;align-items:center;justify-content:center}
-  .gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:min(380px,92vw);box-shadow:var(--shadow);text-align:center}
-  .gatecard .ico{font-size:40px}
-  .gatecard h3{font-size:17px;margin:6px 0 2px}
-  .gatecard p{font-size:12.5px;color:var(--muted);margin-bottom:14px}
-  .gatecard input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;text-align:center;letter-spacing:4px}
-  .gatecard input:focus{outline:none;border-color:var(--navy)}
-  .gate-err{display:none;background:var(--redbg);color:var(--red);border-radius:8px;padding:8px;font-size:12.5px;margin-top:10px}
-  .gate-hint{background:var(--goldbg);border-radius:9px;padding:8px;font-size:12px;color:var(--gold-dark);margin-top:13px;line-height:1.8}
-
-  /* ===== لوحة السجلات ===== */
-  .recstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
-  .rcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
-  .rcard .lb{font-size:11.5px;color:var(--muted)}
-  .rcard .vl{font-size:24px;font-weight:800;color:var(--navy);margin:3px 0}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;box-shadow:var(--shadow)}
-  .panel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-  .panel h3{font-size:14.5px}
-  .tblwrap{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:12.8px}
-  th{text-align:right;background:var(--navy);color:#fff;padding:9px 11px;font-size:11.8px;white-space:nowrap}
-  td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:middle}
-  tr:hover td{background:#f6f9fc}
-  .status{font-size:11px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap}
-  .s-new{background:var(--bluebg);color:var(--blue)}
-  .s-rev{background:var(--goldbg);color:var(--gold-dark)}
-  .s-int{background:var(--purplebg);color:var(--purple)}
-  .s-ok{background:var(--greenbg);color:var(--green)}
-  .s-no{background:var(--redbg);color:var(--red)}
-  .sels{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-  .sels select{padding:6px 8px;font-size:11.5px;border:1.5px solid var(--line);border-radius:7px;font-family:inherit}
-  .muted{color:var(--muted);font-size:12px}
-  .rankmini{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px}
+  /* ===== تسجيل الدخول ===== */
+  .auth{min-height:82vh;display:flex;align-items:center;justify-content:center;padding:28px 0}
+  .authcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 28px;width:min(410px,94vw);box-shadow:var(--shadow)}
+  .authcard .logo{width:58px;height:58px;border-radius:16px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:27px;margin:0 auto 14px}
+  .authcard h3{text-align:center;font-size:17px;color:var(--navy);margin-bottom:2px}
+  .authcard .sub{text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:18px}
+  .authcard .fld{margin-bottom:12px}
+  .authcard .fld label{display:block;margin-bottom:4px}
+  .authcard .txt{width:100%}
+  .auth-tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--gray-bg);padding:5px;border-radius:11px}
+  .auth-tab{flex:1;border:none;background:none;padding:8px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .auth-tab.on{background:#fff;color:var(--teal);box-shadow:var(--shadow)}
+  .hruns{background:var(--teal-bg);border-radius:9px;padding:9px;font-size:12px;color:var(--teal-dark);margin-top:14px;text-align:center}
+  .err{display:none;background:var(--red-bg);color:var(--red);border-radius:9px;padding:9px;font-size:12.5px;margin-top:10px;text-align:center}
 
   /* ===== الرسائل ===== */
-  .toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:var(--navy);color:#fff;padding:12px 24px;border-radius:11px;font-size:13.5px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.35s;z-index:200;pointer-events:none;text-align:center}
+  .toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:var(--navy);color:#fff;padding:12px 26px;border-radius:11px;font-size:13.5px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.35s;z-index:300;pointer-events:none;text-align:center;max-width:90vw}
   .toast.show{opacity:1}
   .toast.bad{background:var(--red)}
+  .toast.ok{background:var(--green)}
 
-  /* ===== الفوتر ===== */
-  .pfoot{background:var(--navy2);color:#c6d9ea;padding:32px 0 18px;margin-top:26px}
-  .pfoot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;margin-bottom:18px}
-  .pfoot h4{color:#fff;margin-bottom:9px;font-size:14.5px}
-  .pfoot p,.pfoot a{font-size:12.5px;color:#c6d9ea;display:block;padding:2px 0}
-  .pfoot a:hover{color:#ffd98a}
-  .pfoot .bot{border-top:1px solid rgba(255,255,255,.14);padding-top:14px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.6)}
+  /* ===== شاشة الطباعة المخفية / الفوتر ===== */
+  .foot{background:var(--navy2);color:#c6d9ea;padding:30px 0 18px;margin-top:24px}
+  .foot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;margin-bottom:16px}
+  .foot h4{color:#fff;margin-bottom:8px;font-size:14px}
+  .foot p,.foot a{font-size:12.5px;color:#c6d9ea;display:block;padding:2px 0}
+  .foot a:hover{color:#ffe0a3}
+  .foot .bot{border-top:1px solid rgba(255,255,255,.14);padding-top:13px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.6)}
+
+  /* ===== النوافذ ===== */
+  .modal{position:fixed;inset:0;background:rgba(10,25,35,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:18px}
+  .modal.open{display:flex}
+  .modalcard{background:#fff;border-radius:15px;width:min(560px,96vw);max-height:92vh;overflow:auto;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modalcard h3{font-size:16px;color:var(--navy);margin-bottom:14px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .close-x{float:left;border:none;background:var(--gray-bg);width:32px;height:32px;border-radius:8px;font-size:15px;color:var(--muted)}
+  .printcard{display:none;position:fixed;inset:0;background:#fff;z-index:500;padding:26px;overflow:auto}
+  .printcard h2{color:var(--navy)}
+  .printcard .docline{display:flex;justify-content:space-between;border-bottom:1px dashed var(--gray);padding:5px 0;font-size:13px}
+  .printcard table th,.printcard table td{color:#000;background:transparent}
 
   @media(max-width:760px){
-    .pnav nav{flex-wrap:wrap;justify-content:flex-end}
-    .hero h1{font-size:23px}
-    .pnav .in{height:auto;padding:10px 0;flex-direction:column;gap:6px}
+    .topbar .in{height:auto;padding:10px 0;flex-direction:column;gap:8px;align-items:flex-start}
+    .hero h1{font-size:22px}
+  }
+  @media print{
+    .no-print{display:none!important}
+    .printcard{display:block!important}
   }
 </style>
 </head>
 <body>
 
-<!-- ══════════════ الشريط العلوي ══════════════ -->
-<div class="pnav">
+<!-- ===== الشريط العلوي ===== -->
+<div class="topbar no-print">
   <div class="container in">
-    <a class="brand" onclick="go('jobs')">
-      <span class="ico">🏢</span>
-      <span>شركة الرافدين<small>للاستثمار والخدمات</small></span>
-    </a>
-    <nav>
-      <button id="navJobs" class="navbtn on" onclick="go('jobs')">📋 الوظائف</button>
-      <button id="navRec" class="navbtn" onclick="go('records')">🗂️ السجلات</button>
-      <button class="navbtn gold" onclick="go('jobs');setTimeout(showTop,300)">➕ سجّل الآن</button>
-    </nav>
+    <div class="brand" onclick="showHome()" style="cursor:pointer">
+      <span class="ico">💊</span>
+      <span>مكتب الفيض الدوائي العلمي<small>منصة المستودع والطباعة الذكية</small></span>
+    </div>
+    <div class="topnav" id="topnav"></div>
+    <div id="userArea"></div>
   </div>
 </div>
 
-<!-- ══════════════ الهيرو ══════════════ -->
-<div class="hero">
-  <div class="container">
-    <h1>انضم إلى فريق شركة الرافدين 👋</h1>
-    <p>نظام الرتب الوظيفي: كل وظيفة لها رتبة محددة — من الإدارة العليا إلى المبتدئين — وسجلات التقديم تُدوّن وتُتابع بمراحلها.</p>
-    <div class="stats">
-      <div class="st"><b id="stJobs">0</b><span>وظيفة شاغرة</span></div>
-      <div class="st"><b id="stR1">0</b><span>رتبة أولى (إدارة)</span></div>
-      <div class="st"><b id="stRecs">0</b><span>سجل تقديم</span></div>
-      <div class="st"><b id="stNew">0</b><span>سجلات جديدة</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════ عرض الوظائف ══════════════ -->
-<div id="viewJobs">
-  <div class="container">
-    <div class="filters">
-      <input id="searchQ" placeholder="🔍 ابحث: وظيفة، قسم، مكان..." oninput="renderJobs()">
-      <select id="rankF" onchange="renderJobs()">
-        <option value="">كل الرتب</option>
-        <option value="1">⭐ الرتبة الأولى — إدارة عليا</option>
-        <option value="2">⭐⭐ الرتبة الثانية — إدارة وسطى</option>
-        <option value="3">⭐⭐⭐ الرتبة الثالثة — إشراف</option>
-        <option value="4">⭐⭐⭐⭐ الرتبة الرابعة — تنفيذي</option>
-        <option value="5">⭐⭐⭐⭐⭐ الرتبة الخامسة — مبتدئ</option>
-      </select>
-      <button class="btn btn-navy btn-sm" onclick="showTop()">⬆ للوظيفة الأعلى رتبة</button>
-    </div>
-    <div id="jobsGrid" class="job-grid"></div>
-    <div id="jobDetailBox" style="display:none"></div>
-  </div>
-</div>
-
-<!-- ══════════════ السجلات (بوابة PIN) ══════════════ -->
-<div id="viewRecords" style="display:none">
-  <div class="container">
-    <div id="gateBox">
-      <div class="gate">
-        <div class="gatecard">
-          <div class="ico">🔐</div>
-          <h3>منطقة السجلات</h3>
-          <p>هذه المنطقة خاصة بإدارة الشركة — أدخل رمز الدخول</p>
-          <input id="pinInput" type="password" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')tryGate()">
-          <button class="btn btn-navy" style="width:100%;margin-top:12px" onclick="tryGate()">دخول</button>
-          <div class="gate-err" id="gateErr">الرمز غير صحيح — حاول مرة أخرى</div>
-          <div class="gate-hint">🔑 <b>رمز تجريبي:</b> 1234
-(في النسخة الحقيقية يُدار عبر لوحة إدارة محمية بكلمة مرور)</div>
-          <p style="margin-top:12px"><a href="#" style="color:var(--navy);font-size:12.5px;font-weight:700;cursor:pointer" onclick="go('jobs');return false">← رجوع للوظائف</a></p>
-        </div>
-      </div>
-    </div>
-
-    <div id="recordsBox" style="display:none">
-      <div class="recstats">
-        <div class="rcard"><div class="lb">🗂️ كل السجلات</div><div class="vl" id="rsTotal">0</div></div>
-        <div class="rcard"><div class="lb">🆕 جديد</div><div class="vl" style="color:var(--blue)" id="rsNew">0</div></div>
-        <div class="rcard"><div class="lb">✅ مقبول</div><div class="vl" style="color:var(--green)" id="rsOk">0</div></div>
-        <div class="rcard"><div class="lb">❌ مرفوض</div><div class="vl" style="color:var(--red)" id="rsNo">0</div></div>
+<!-- ===== قسم الدخول ===== -->
+<div id="authView">
+  <div class="auth">
+    <div class="authcard">
+      <div class="logo">💊</div>
+      <h3>مكتب الفيض الدوائي العلمي</h3>
+      <div class="sub">نظام إدارة الأدوية — منصة المستودع والطباعة الذكية</div>
+      <div class="auth-tabs">
+        <button class="auth-tab on" id="tabLogin" onclick="authTab('login')">تسجيل الدخول</button>
+        <button class="auth-tab" id="tabReg" onclick="authTab('register')">إنشاء حساب</button>
+        <button class="auth-tab" id="tabForgot" onclick="authTab('forgot')">نسيت كلمة المرور</button>
       </div>
 
-      <div class="panel">
-        <div class="hd">
-          <h3>📋 سجلات المتقدمين</h3>
-          <div class="sels">
-            <select id="recRankF" onchange="renderRecords()">
-              <option value="">كل الرتب</option>
-              <option value="1">الرتبة الأولى</option><option value="2">الرتبة الثانية</option>
-              <option value="3">الرتبة الثالثة</option><option value="4">الرتبة الرابعة</option>
-              <option value="5">الرتبة الخامسة</option>
-            </select>
-            <select id="recStatusF" onchange="renderRecords()">
-              <option value="">كل الحالات</option>
-              <option>جديد</option><option>قيد المراجعة</option><option>تمت المقابلة</option><option>مقبول</option><option>مرفوض</option>
-            </select>
-            <input id="recSearch" placeholder="بحث بالاسم/الهاتف..." style="padding:7px 11px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px" oninput="renderRecords()">
-            <button class="btn btn-gold btn-sm" onclick="exportRecs()">📤 تصدير CSV</button>
-          </div>
-        </div>
-        <div class="tblwrap">
-          <table>
-            <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الوظيفة</th><th>الرتبة</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
-            <tbody id="recBody"></tbody>
-          </table>
-        </div>
+      <!-- دخول -->
+      <div id="formLogin">
+        <div class="fld"><label>اسم المستخدم</label><input class="txt" id="liUser" placeholder="admin"></div>
+        <div class="fld"><label>كلمة المرور</label><input class="txt" id="liPass" type="password" placeholder="••••••"></div>
+        <button class="btn btn-teal" style="width:100%;margin-top:8px" onclick="doLogin()">دخول</button>
+        <div class="hruns">🔑 حساب المدير للتجربة: <b>admin / admin123</b></div>
+      </div>
+
+      <!-- إنشاء حساب -->
+      <div id="formReg" style="display:none">
+        <div class="fld"><label>الاسم الكامل</label><input class="txt" id="rgName" placeholder="الاسم الكامل"></div>
+        <div class="fld"><label>اسم المستخدم</label><input class="txt" id="rgUser" placeholder="اسم المستخدم"></div>
+        <div class="fld"><label>كلمة المرور</label><input class="txt" id="rgPass" type="password" placeholder="كلمة المرور"></div>
+        <div class="fld"><label>تأكيد كلمة المرور</label><input class="txt" id="rgPass2" type="password" placeholder="تأكيد"></div>
+        <button class="btn btn-teal" style="width:100%;margin-top:8px" onclick="doRegister()">إنشاء الحساب</button>
+      </div>
+
+      <!-- نسيت كلمة المرور -->
+      <div id="formForgot" style="display:none">
+        <div class="fld"><label>اسم المستخدم</label><input class="txt" id="fgUser" placeholder="اسم المستخدم"></div>
+        <div class="fld"><label>البريد الإلكتروني</label><input class="txt" id="fgEmail" type="email" placeholder="example@mail.com"></div>
+        <button class="btn btn-teal" style="width:100%;margin-top:8px" onclick="doForgot()">استعادة كلمة المرور</button>
+      </div>
+
+      <div class="err" id="authErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== قسم التطبيق ===== -->
+<div id="appView" style="display:none">
+  <!-- الهيرو -->
+  <div class="hero">
+    <div class="container">
+      <span class="badge-hero">🏥 منصة المستودع والطباعة الذكية</span>
+      <h1>مكتب الفيض الدوائي العلمي</h1>
+      <p>متابعة الأدوية، كتب الفحص، تجهيز البيع، الحسابات والديون، وسجل كامل لكل حركة داخل النظام.</p>
+      <div class="stats">
+        <div class="st"><b id="stMed">0</b><span>أصناف الدواء</span></div>
+        <div class="st"><b id="stLow">0</b><span>تنبيه مخزون</span></div>
+        <div class="st"><b id="stOrders">0</b><span>طلبات بيع</span></div>
+        <div class="st"><b id="stDebt">0</b><span>ديون مستحقة</span></div>
       </div>
     </div>
   </div>
+
+  <!-- المحتوى -->
+  <div class="container" id="moduleArea"></div>
+
+  <!-- الفوتر -->
+  <div class="foot">
+    <div class="container">
+      <div class="cols">
+        <div><h4>💊 مكتب الفيض الدوائي</h4><p>منصة متكاملة لإدارة الأدوية، كتب الفحص، تجهيز البيع والحسابات — بسجل شامل لكل حركة.</p></div>
+        <div><h4>الأقسام</h4><a onclick="go('medicines')">متابعة الأدوية</a><a onclick="go('exams')">كتب الفحص</a><a onclick="go('sales')">تجهيز البيع</a></div>
+        <div><h4>روابط</h4><a onclick="go('accounts')">الحسابات والديون</a><a onclick="go('log')">سجل الحركات</a></div>
+      </div>
+      <div class="bot">© 2026 مكتب الفيض الدوائي العلمي — جميع الحقوق محفوظة</div>
+    </div>
+  </div>
 </div>
 
-<!-- ══════════════ الفوتر ══════════════ -->
-<div class="pfoot">
-  <div class="container">
-    <div class="cols">
-      <div><h4>🏢 شركة الرافدين</h4><p>منذ 2010 نعمل في الاستثمار والخدمات العامة — فريقنا هو أساس نجاحنا، ونظام الرتب يضمن مساراً واضحاً لكل موظف.</p></div>
-      <div><h4>روابط</h4><a onclick="go('jobs')">الوظائف الشاغرة</a><a onclick="go('records')">سجلات التقديم</a></div>
-      <div><h4>التواصل</h4><a>📞 0780 123 4567</a><a>✉️ hr@al-rafidain.com</a><a>📍 بغداد — المنصور، شارع 14 رمضان</a></div>
-    </div>
-    <div class="bot">© 2026 شركة الرافدين — جميع الحقوق محفوظة</div>
+<!-- ===== الطباعة ===== -->
+<div class="printcard" id="printArea"></div>
+
+<!-- ===== نافذة منبثقة ===== -->
+<div class="modal" id="modal">
+  <div class="modalcard">
+    <button class="close-x" onclick="closeModal()">✕</button>
+    <div id="modalBody"></div>
   </div>
 </div>
 
@@ -273,308 +256,565 @@
 
 <script>
 /* ═══════════════════════════════════════════════
-   شركة الرافدين — نظام الوظائف (الرتب والسجلات)
-   البيانات تظهر عبر أمثلة توضيحية تلقائية + إضافات
+   مكتب الفيض الدوائي العلمي — نظام إدارة الأدوية
    ═══════════════════════════════════════════════ */
 
-/* ---- الرتب (الأسماء والألوان) ---- */
-const RANKS = {
-  1:{name:"الرتبة الأولى — إدارة عليا", short:"إدارة عليا", icon:"⭐⭐"},
-  2:{name:"الرتبة الثانية — إدارة وسطى", short:"إدارة وسطى", icon:"⭐⭐⭐"},
-  3:{name:"الرتبة الثالثة — إشراف", short:"إشراف", icon:"⭐⭐⭐⭐"},
-  4:{name:"الرتبة الرابعة — تنفيذي", short:"تنفيذي", icon:"⭐⭐⭐⭐⭐"},
-  5:{name:"الرتبة الخامسة — مبتدئ", short:"مبتدئ", icon:"⭐"}
+const LS = {med:'fayd_meds', exam:'fayd_exams', sell:'fayd_sells', acc:'fayd_accs', log:'fayd_log', user:'fayd_user', session:'fayd_session'};
+
+/* ---------- أدوات عامة ---------- */
+const $ = id => document.getElementById(id);
+const fmtN = n => new Intl.NumberFormat('ar-IQ').format(n||0);
+const nowISO = () => new Date().toISOString().slice(0,10);
+const today = () => new Date().toLocaleDateString('ar-IQ',{year:'numeric',month:'long',day:'numeric'});
+function load(k,fb){ try{ const r = localStorage.getItem(k); if(r!==null) return JSON.parse(r); }catch(e){} return fb; }
+function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+/* ---------- قاعدة البيانات ---------- */
+let state = {
+  meds: [],       // أدوية
+  exams: [],      // كتب فحص
+  sells: [],      // طلبات بيع
+  accs: [],       // حسابات / ديون
+  log: []         // سجل حركات
 };
-const RCLASS = {1:"r1",2:"r2",3:"r3",4:"r4",5:"r5"};
-const RCOLOR = {1:"#a97a1e",2:"#2563a8",3:"#0e7a5f",4:"#6b4fa0",5:"#64748b"};
 
-/* ---- الوظائف الشاغرة ---- */
-const JOBS = [
-  {id:1, title:"مدير عام", dept:"الإدارة العليا", place:"بغداد — المنصور", salary:"4,500,000 د.ع", rank:1, 
-   desc:"قيادة الشركة ووضع الاستراتيجية العامة والإشراف على جميع الأقسام.", req:"خبرة 15+ سنة، شهادة ماجستير بإدارة الأعمال، مهارات قيادية عالية."},
-  {id:2, title:"مدير الموارد البشرية", dept:"الموارد البشرية", place:"بغداد — المنصور", salary:"3,200,000 د.ع", rank:1,
-   desc:"إدارة دورة عمل الموظفين من التوظيف إلى التقييم والتطوير.", req:"خبرة 10+ سنوات، تخصص إدارة أعمال أو قانون، مهارات تواصل ممتازة."},
-  {id:3, title:"محاسب أول", dept:"المالية", place:"بغداد — المنصور", salary:"2,300,000 د.ع", rank:2,
-   desc:"متابعة الحسابات والقيود المالية وإعداد التقارير الدورية.", req:"خبرة 6+ سنوات، بكالوريوس محاسبة، إجادة Excel وبرامج محاسبية."},
-  {id:4, title:"مشرف صيانة", dept:"الخدمات", place:"بغداد — الكرادة", salary:"1,800,000 د.ع", rank:3,
-   desc:"الإشراف على فرق الصيانة ومتابعة جودة التنفيذ والسلامة.", req:"خبرة 4+ سنوات، دبلوم فني، قدرة على إدارة الفرق."},
-  {id:5, title:"مسؤول استثمار", dept:"الاستثمار", place:"بغداد — المنصور", salary:"2,600,000 د.ع", rank:2,
-   desc:"دراسة الفرص الاستثمارية وإعداد دراسات الجدوى والمفاوضات.", req:"خبرة 5+ سنوات، تخصص مالية أو اقتصاد، مهارات تحليلية."},
-  {id:6, title:"منسق اداري", dept:"الإدارة", place:"بغداد — الكرادة", salary:"1,300,000 د.ع", rank:4,
-   desc:"تنسيق الأعمال الإدارية والمستندات والمراسلات اليومية.", req:"بكالوريوس، مهارات مكتبية وإجادة الحاسوب، خبرة 2+ سنوات."},
-  {id:7, title:"موظف خدمة عملاء", dept:"خدمة العملاء", place:"بغداد — المنصور", salary:"1,100,000 د.ع", rank:5,
-   desc:"استقبال الاتصالات وخدمة العملاء وحل استفساراتهم.", req:"مهارات تواصل، حاسوب، خبرة سنة أو خريج جديد."},
-  {id:8, title:"سائق", dept:"النقل", place:"بغداد", salary:"950,000 د.ع", rank:5,
-   desc:"القيادة ونقل الموظفين والمعدات ضمن أوقات العمل.", req:"رخصة قيادة سارية، معرفة بشوارع بغداد."}
-];
-
-/* ---- إعداد سجلات المثال (تلقائية لتوضيح اللوحة) ---- */
-const sampleSeed = [
-  {name:"أحمد كريم", phone:"0770 111 2233", jobId:1, rank:1, status:"قيد المراجعة", date:"2026-08-14"},
-  {name:"سارة جاسم", phone:"0781 222 3344", jobId:3, rank:2, status:"جديد", date:"2026-08-22"},
-  {name:"علي حسين", phone:"0790 333 4455", jobId:4, rank:3, status:"تمت المقابلة", date:"2026-08-25"},
-  {name:"مريم عادل", phone:"0771 444 5566", jobId:2, rank:1, status:"مقبول", date:"2026-08-02"},
-  {name:"يوسف سعد", phone:"0782 555 6677", jobId:7, rank:5, status:"جديد", date:"2026-09-01"},
-  {name:"نور محمود", phone:"0791 666 7788", jobId:6, rank:4, status:"مرفوض", date:"2026-07-30"}
-];
-
-let records = [];
-const LS_KEY = "rafidain_records_v1";
-
-/* ---- تحميل وتخزين السجلات ---- */
-function loadRecords(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(raw){ records = JSON.parse(raw); return; }
-  }catch(e){}
-  records = sampleSeed.map(s=>({...s, id:Date.now()+Math.random()}));
-  saveRecords();
-}
-function saveRecords(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(records)); }catch(e){}
-}
-function nextId(){ return Date.now()+Math.floor(Math.random()*1000); }
-
-/* ---- التنقل بين الصفحات ---- */
-function go(view){
-  const jobsEl = document.getElementById('viewJobs');
-  const recEl  = document.getElementById('viewRecords');
-  const nj = document.getElementById('navJobs');
-  const nr = document.getElementById('navRec');
-  if(view==='jobs'){
-    jobsEl.style.display=''; recEl.style.display='none';
-    nj.classList.add('on'); nr.classList.remove('on');
-    renderJobs();
-  }else{
-    jobsEl.style.display='none'; recEl.style.display='';
-    nr.classList.add('on'); nj.classList.remove('on');
-    if(!localStorage.getItem('rafidain_gate')){
-      document.getElementById('gateBox').style.display='';
-      document.getElementById('recordsBox').style.display='none';
-      setTimeout(()=>document.getElementById('pinInput').focus(),50);
-    }else{
-      document.getElementById('gateBox').style.display='none';
-      document.getElementById('recordsBox').style.display='';
-      renderRecords();
-    }
-  }
-  window.scrollTo({top:0, behavior:'smooth'});
+function initData(){
+  state.meds  = load(LS.med, [
+    {id:1,name:'باراسيتامول 500mg',cat:'مسكنات',batch:'A-2201',expire:'2027-05',qty:240,price:1500,threshold:60},
+    {id:2, name:'أموكسيسيلين 500mg',cat:'مضادات حيوية',batch:'A-2202',expire:'2026-11',qty:120,price:4000,threshold:50},
+    {id:3, name:'فيتامين د 50000',cat:'فيتامينات',batch:'B-3301',expire:'2027-08',qty:45,price:8000,threshold:40},
+    {id:4, name:'بروفين 400mg',cat:'مسكنات',batch:'C-4401',expire:'2026-09',qty:180,price:2500,threshold:50}
+  ]);
+  state.exams = load(LS.exam, [
+    {id:1,code:'EX-1001',patient:'محمد علي',result:'سليم',date:'2026-08-18',status:'جاهز'},
+    {id:2,code:'EX-1002',patient:'زينب أحمد',result:'يحتاج متابعة',date:'2026-08-25',status:'جاهز'}
+  ]);
+  state.sells = load(LS.sell, [
+    {id:1,bill:'BILL-0001',customer:'أحمد كريم',items:[{name:'باراسيتامول 500mg',qty:2,price:1500}],total:3000,date:'2026-08-28',status:'مكتمل'},
+    {id:2,bill:'BILL-0002',customer:'سارة جاسم',items:[{name:'فيتامين د 50000',qty:1,price:8000}],total:8000,date:'2026-09-01',status:'مكتمل'}
+  ]);
+  state.accs = load(LS.acc, [
+    {id:1,name:'صيدلية الأمل',type:'عميل',amount:120000,due:'2026-09-15',status:'مستحقة'},
+    {id:2,name:'مستودع بغداد',type:'مورد',amount:450000,due:'2026-09-20',status:'مستحقة'}
+  ]);
+  state.log = load(LS.log, [
+    {id:1,time:Date.now()-86400000,user:'admin',action:'بدء تشغيل النظام',detail:'تهيئة البيانات الأولية'}
+  ]);
 }
 
-/* ---- بوابة الدخول ---- */
-const PIN = "1234";
-function tryGate(){
-  const val = document.getElementById('pinInput').value.trim();
-  if(val===PIN){
-    localStorage.setItem('rafidain_gate','1');
-    document.getElementById('gateBox').style.display='none';
-    document.getElementById('recordsBox').style.display='';
-    document.getElementById('gateErr').style.display='none';
-    toast('✅ تم الدخول بنجاح');
-    renderRecords();
-  }else{
-    document.getElementById('gateErr').style.display='block';
-    document.getElementById('pinInput').value='';
-    document.getElementById('pinInput').focus();
-  }
+function persist(k){
+  save(LS[k], state[k]);
+}
+function pushLog(action,detail){
+  state.log.unshift({id:Date.now()+Math.random(),time:Date.now(),user:state.session?.user||'نظام',action,detail});
+  state.log = state.log.slice(0,200);
+  persist('log');
 }
 
-/* ---- رندر الوظائف ---- */
-function renderJobs(){
-  const q = (document.getElementById('searchQ').value||'').trim().toLowerCase();
-  const rf = document.getElementById('rankF').value;
-  const grid = document.getElementById('jobsGrid');
-  let list = JOBS.slice();
-  if(rf){ list = list.filter(j=>j.rank===parseInt(rf)); }
-  if(q){ list = list.filter(j=> (j.title+j.dept+j.place).toLowerCase().includes(q)); }
-  if(!list.length){
-    grid.innerHTML = '<div class="emptystate">🔎 لا توجد وظائف مطابقة لبحثك</div>';
-  }else{
-    grid.innerHTML = list.map(j=>{
-      const fallback = RANKS[j.rank].icon;
-      return `<div class="jcard">
-        <div class="top">
-          <h3>${j.title}</h3>
-          <span class="rbadge ${RCLASS[j.rank]}">${RANKS[j.rank].short}</span>
-        </div>
-        <div class="meta">
-          <span>🏢 ${j.dept}</span><span>📍 ${j.place}</span><span>${fallback}</span>
-        </div>
-        <div class="salary">💵 ${j.salary}</div>
-        <div class="foot">
-          <span class="muted">${RANKS[j.rank].name}</span>
-          <button class="btn btn-navy btn-sm" onclick="showDetail(${j.id})">التفاصيل</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  updateHeroStats();
-}
+/* ---------- الحساب / الدخول ---------- */
+const ADMIN = {name:'مدير النظام', user:'admin', pass:'admin123'};
+let users = [];
 
-/* ---- عرض تفاصيل وظيفة + نموذج التسجيل ---- */
-function showDetail(id){
-  const j = JOBS.find(x=>x.id===id);
-  if(!j) return;
-  document.getElementById('jobDetailBox').style.display='block';
-  document.getElementById('jobsGrid').style.display='none';
-  document.getElementById('jobDetailBox').innerHTML = `
-    <div class="detail">
-      <h1>${j.title}</h1>
-      <div class="dmeta">
-        <span>${RANKS[j.rank].name}</span><span>🏢 ${j.dept}</span><span>📍 ${j.place}</span><span>💵 ${j.salary}</span>
-      </div>
-      <h4>📌 عن الوظيفة</h4><p>${j.desc}</p>
-      <h4>🎓 المتطلبات</h4><p>${j.req}</p>
-      <div class="apply">
-        <h3>✍️ قدّم على هذه الوظيفة</h3>
-        <label>الاسم الكامل</label>
-        <input id="apName" placeholder="أدخل اسمك الثلاثي">
-        <label>رقم الهاتف</label>
-        <input id="apPhone" placeholder="07xx xxx xxxx">
-        <label>ملاحظة</label>
-        <textarea id="apNote" rows="3" placeholder="أي معلومات إضافية (اختياري)"></textarea>
-        <button class="btn btn-gold" style="margin-top:14px;width:100%" onclick="submitApply(${id})">إرسال الطلب</button>
-      </div>
-      <button class="btn btn-line btn-sm" style="margin-top:12px" onclick="backToList()">← رجوع للقائمة</button>
-    </div>`;
-  window.scrollTo({top:0, behavior:'smooth'});
+function getUsers(){
+  const u = load(LS.user, []);
+  return [{...ADMIN}, ...u];
 }
-function backToList(){
-  document.getElementById('jobDetailBox').style.display='none';
-  document.getElementById('jobDetailBox').innerHTML='';
-  document.getElementById('jobsGrid').style.display='';
-  renderJobs();
-}
+function setUsers(u){ save(LS.user, u); }
 
-/* ---- إرسال طلب التقديم ---- */
-function submitApply(jobId){
-  const name = document.getElementById('apName').value.trim();
-  const phone = document.getElementById('apPhone').value.trim();
-  if(!name || !phone){ toast('⚠️ أدخل الاسم ورقم الهاتف', true); return; }
-  const j = JOBS.find(x=>x.id===jobId);
-  records.unshift({
-    id: nextId(),
-    name: name,
-    phone: phone,
-    jobId: jobId,
-    jobTitle: j.title,
-    rank: j.rank,
-    status: "جديد",
-    date: new Date().toISOString().slice(0,10)
+function authTab(t){
+  ['login','register','forgot'].forEach(x=>{
+    $('formLogin').style.display = x==='login'?'':'none';
+    $('formReg').style.display = x==='register'?'':'none';
+    $('formForgot').style.display = x==='forgot'?'':'none';
+    $('tabLogin').classList.toggle('on', x==='login');
+    $('tabReg').classList.toggle('on', x==='register');
+    $('tabForgot').classList.toggle('on', x==='forgot');
   });
-  saveRecords();
-  toast('✅ تم حفظ طلبك بنجاح');
-  backToList();
+  $('authErr').style.display='none';
+}
+function showErr(m){ const e=$('authErr'); e.textContent=m; e.style.display='block'; }
+
+function doLogin(){
+  const u = $('liUser').value.trim();
+  const p = $('liPass').value;
+  const all = getUsers();
+  const found = all.find(x=>x.user===u && x.pass===p);
+  if(!found){ showErr('اسم المستخدم أو كلمة المرور غير صحيحة'); return; }
+  state.session = {user:found.user, name:found.name};
+  save(LS.session, state.session);
+  pushLog('تسجيل دخول','دخول المستخدم '+found.user);
+  enterApp();
+}
+function doRegister(){
+  const name=$('rgName').value.trim(), u=$('rgUser').value.trim(), p=$('rgPass').value, p2=$('rgPass2').value;
+  if(!name||!u||!p){ showErr('أكمل جميع الحقول'); return; }
+  if(p!==p2){ showErr('كلمة المرور غير متطابقة'); return; }
+  const all = getUsers();
+  if(all.some(x=>x.user===u)){ showErr('اسم المستخدم موجود مسبقاً'); return; }
+  all.push({name,user:u,pass:p});
+  setUsers(all);
+  toast('✅ تم إنشاء الحساب — سجّل الدخول');
+  authTab('login');
+  $('liUser').value=u;
+}
+function doForgot(){
+  const u=$('fgUser').value.trim(), e=$('fgEmail').value.trim();
+  if(!u||!e){ showErr('أدخل اسم المستخدم والبريد'); return; }
+  toast('📧 تم إرسال رابط الاستعادة إلى بريدك (تجريبي)', true);
 }
 
-/* ---- زر: للوظيفة الأعلى رتبة ---- */
-function showTop(){
-  const top = JOBS.slice().sort((a,b)=>a.rank-b.rank)[0];
-  if(top){ showDetail(top.id); }
+function logout(){
+  state.session=null;
+  localStorage.removeItem(LS.session);
+  $('appView').style.display='none';
+  $('authView').style.display='';
+  authTab('login');
+  toast('👋 تم تسجيل الخروج');
+}
+function enterApp(){
+  $('authView').style.display='none';
+  $('appView').style.display='';
+  $('userArea').innerHTML = `<div class="userchip">👤 ${state.session.name}<button class="btn btn-line btn-sm" style="margin-inline-start:8px" onclick="logout()">خروج</button></div>`;
+  buildTopnav();
+  showHome();
+  refreshStats();
 }
 
-/* ---- رندر السجلات ---- */
-function renderRecords(){
-  const rf = document.getElementById('recRankF').value;
-  const sf = document.getElementById('recStatusF').value;
-  const sq = (document.getElementById('recSearch').value||'').trim().toLowerCase();
-  let list = records.slice();
-  if(rf){ list = list.filter(r=>r.rank===parseInt(rf)); }
-  if(sf){ list = list.filter(r=>r.status===sf); }
-  if(sq){ list = list.filter(r=>(r.name+r.phone+(r.jobTitle||'')).toLowerCase().includes(sq)); }
-  const body = document.getElementById('recBody');
-  if(!list.length){
-    body.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">لا توجد سجلات</td></tr>`;
+/* ---------- التنقل بين الأقسام ---------- */
+const MODULES = [
+  {key:'home',       icon:'🏠', name:'الرئيسية'},
+  {key:'medicines',  icon:'💊', name:'متابعة الأدوية'},
+  {key:'exams',      icon:'📄', name:'كتب الفحص'},
+  {key:'sales',      icon:'🛒', name:'تجهيز البيع'},
+  {key:'accounts',   icon:'💰', name:'الحسابات والديون'},
+  {key:'log',        icon:'📋', name:'سجل الحركات'}
+];
+function buildTopnav(){
+  $('topnav').innerHTML = MODULES.map(m=>`<button class="tnav" id="tn_${m.key}" onclick="go('${m.key}')">${m.icon} ${m.name}</button>`).join('');
+}
+function go(key){
+  MODULES.forEach(m=>{ const el=$('tn_'+m.key); if(el) el.classList.toggle('on', m.key===key); });
+  if(key==='home') showHome(); else renderModule(key);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showHome(){
+  MODULES.forEach(m=>{ const el=$('tn_'+m.key); if(el) el.classList.toggle('on', m.key==='home'); });
+  renderHome();
+}
+
+/* ---------- الهيرو — الإحصاءات ---------- */
+function refreshStats(){
+  $('stMed').textContent = state.meds.length;
+  $('stLow').textContent = state.meds.filter(m=>m.qty<=m.threshold).length;
+  $('stOrders').textContent = state.sells.length;
+  $('stDebt').textContent = fmtN(state.accs.filter(a=>a.status==='مستحقة').reduce((s,a)=>s+a.amount,0));
+}
+
+/* ---------- الرئيسية ---------- */
+function renderHome(){
+  const mArea=$('moduleArea');
+  const low = state.meds.filter(m=>m.qty<=m.threshold);
+  mArea.innerHTML = `
+    <div class="grid g-4">
+      <div class="mcard" onclick="go('medicines')"><div class="ico teal-i">💊</div><h3>متابعة الأدوية</h3><p>إدارة الأصناف، الكميات، تاريخ الصلاحية والتنبيهات.</p></div>
+      <div class="mcard" onclick="go('exams')"><div class="ico blue-i">📄</div><h3>كتب الفحص</h3><p>إصدار ومتابعة كتب الفحص المخبري للمرضى.</p></div>
+      <div class="mcard" onclick="go('sales')"><div class="ico green-i">🛒</div><h3>تجهيز البيع</h3><p>إعداد الفواتير وتجهيز الطلبات حتى الطباعة.</p></div>
+      <div class="mcard" onclick="go('accounts')"><div class="ico gold-i">💰</div><h3>الحسابات والديون</h3><p>متابعة المبالغ المستحقة للعملاء والموردين.</p></div>
+      <div class="mcard" onclick="go('log')"><div class="ico purple-i">📋</div><h3>سجل الحركات</h3><p>سجل كامل لكل حركة داخل النظام مع الوقت والمستخدم.</p></div>
+    </div>
+
+    <div class="panel">
+      <div class="hd"><h3>⚠️ تنبيهات المخزون</h3><button class="btn btn-teal btn-sm" onclick="go('medicines')">إدارة الأدوية</button></div>
+      ${low.length? '<div class="tblwrap"><table><thead><tr><th>الاسم</th><th>التصنيف</th><th>الكمية</th><th>الحد الأدنى</th><th>الحالة</th></tr></thead><tbody>'
+        + low.map(m=>`<tr><td>${m.name}</td><td>${m.cat}</td><td><b>${m.qty}</b></td><td>${m.threshold}</td><td><span class="pill p-no">منخفض</span></td></tr>`).join('')
+        + '</tbody></table></div>'
+        : '<p style="color:var(--muted)">لا توجد تنبيهات مخزون حالياً. ✅</p>'}
+    </div>
+
+    <div class="panel">
+      <div class="hd"><h3>🕘 آخر الحركات</h3><button class="btn btn-line btn-sm" onclick="go('log')">عرض الكل</button></div>
+      ${state.log.length? '<div class="tblwrap"><table><thead><tr><th>الوقت</th><th>المستخدم</th><th>الحركة</th><th>التفاصيل</th></tr></thead><tbody>'
+        + state.log.slice(0,5).map(l=>`<tr><td>${new Date(l.time).toLocaleString('ar-IQ')}</td><td>${l.user}</td><td>${l.action}</td><td>${l.detail}</td></tr>`).join('')
+        + '</tbody></table></div>'
+        : '<p style="color:var(--muted)">لا توجد حركات.</p>'}
+    </div>`;
+}
+
+/* ---------- وحدة: الأدوية ---------- */
+function renderMedicines(){
+  const mArea=$('moduleArea');
+  mArea.innerHTML = `
+    <div class="panel">
+      <div class="hd"><h3>💊 متابعة الأدوية</h3><button class="btn btn-gold" onclick="openMedModal()">+ إضافة دواء</button></div>
+      <div class="rowf" style="margin-bottom:12px">
+        <div class="fld"><label>بحث</label><input class="txt" id="medQ" oninput="renderMedTable()" placeholder="🔍 اسم / تصنيف"></div>
+        <div class="fld"><label>التصنيف</label><select class="sel" id="medCat" onchange="renderMedTable()"><option value="">الكل</option></select></div>
+      </div>
+      <div class="tblwrap"><table><thead><tr><th>الاسم</th><th>التصنيف</th><th>الدفعة</th><th>الصلاحية</th><th>الكمية</th><th>السعر</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="medBody"></tbody></table></div>
+    </div>`;
+  const cats = [...new Set(state.meds.map(m=>m.cat))];
+  $('medCat').innerHTML = '<option value="">الكل</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+  renderMedTable();
+  refreshStats();
+}
+function renderMedTable(){
+  const q=($('medQ').value||'').trim().toLowerCase();
+  const c=$('medCat').value;
+  let list=state.meds.slice();
+  if(c) list=list.filter(m=>m.cat===c);
+  if(q) list=list.filter(m=>(m.name+m.cat+m.batch).toLowerCase().includes(q));
+  const body=$('medBody');
+  if(!list.length){ body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">لا توجد أصناف</td></tr>'; return; }
+  body.innerHTML = list.map(m=>{
+    const st = m.qty<=m.threshold ? '<span class="pill p-no">منخفض</span>' : (m.qty<=m.threshold*1.5? '<span class="pill p-lw">قريب من الحد</span>':'<span class="pill p-ok">متوفر</span>');
+    const exp = isNearExpire(m.expire)? '<span class="pill p-lw">قريب</span>':'<span class="pill p-inf">'+m.expire+'</span>';
+    return `<tr>
+      <td>${m.name}</td><td>${m.cat}</td><td>${m.batch}</td><td>${exp}</td>
+      <td><b>${m.qty}</b></td><td>${fmtN(m.price)} د.ع</td><td>${st}</td>
+      <td class="rowf" style="gap:5px">
+        <button class="btn btn-teal btn-sm" onclick="openMedModal(${m.id})">✏️</button>
+        <button class="btn btn-line btn-sm" onclick="adjustStock(${m.id})">↕️</button>
+        <button class="btn btn-danger btn-sm" onclick="delMed(${m.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function isNearExpire(ex){
+  if(!ex) return false;
+  const d = new Date(ex+'-01');
+  const now = new Date();
+  const diff = (d-now)/(1000*60*60*24);
+  return diff < 120 && diff > -365;
+}
+function openMedModal(id){
+  const m = id? state.meds.find(x=>x.id===id) : null;
+  $('modalBody').innerHTML = `
+    <h3>${m? 'تعديل دواء':'إضافة دواء جديد'}</h3>
+    <div class="fld" style="margin-bottom:10px"><label>اسم الدواء</label><input class="txt" id="mmName" value="${m?m.name:''}"></div>
+    <div class="fld" style="margin-bottom:10px"><label>التصنيف</label><input class="txt" id="mmCat" value="${m?m.cat:''}"></div>
+    <div class="fld" style="margin-bottom:10px"><label>الدفعة</label><input class="txt" id="mmBatch" value="${m?m.batch:''}"></div>
+    <div class="fld" style="margin-bottom:10px"><label>تاريخ الصلاحية</label><input class="txt" id="mmExp" type="month" value="${m?m.expire:''}"></div>
+    <div class="rowf" style="gap:10px">
+      <div class="fld"><label>الكمية</label><input class="txt" id="mmQty" type="number" value="${m?m.qty:''}"></div>
+      <div class="fld"><label>السعر (د.ع)</label><input class="txt" id="mmPrice" type="number" value="${m?m.price:''}"></div>
+      <div class="fld"><label>الحد الأدنى</label><input class="txt" id="mmThr" type="number" value="${m?m.threshold:''}"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-teal" onclick="saveMed(${m?m.id:0})">💾 حفظ</button>
+      <button class="btn btn-line" onclick="closeModal()">إلغاء</button>
+    </div>`;
+  $('modal').classList.add('open');
+}
+function saveMed(id){
+  const name=$('mmName').value.trim(), cat=$('mmCat').value.trim(), batch=$('mmBatch').value.trim(), exp=$('mmExp').value;
+  const qty=parseInt($('mmQty').value)||0, price=parseInt($('mmPrice').value)||0, thr=parseInt($('mmThr').value)||0;
+  if(!name){ toast('أدخل اسم الدواء', true); return; }
+  if(id){
+    const m=state.meds.find(x=>x.id===id);
+    Object.assign(m,{name,cat,batch,exp,qty,price,threshold:thr});
+    pushLog('تعديل دواء',name);
   }else{
-    body.innerHTML = list.map((r,i)=>{
-      const rlabel = r.rank? (RANKS[r.rank]?RANKS[r.rank].short:'') : '';
-      const rcls = r.rank? (RCLASS[r.rank]||'r5') : 'r5';
-      return `<tr>
-        <td>${i+1}</td>
-        <td>${r.name}</td>
-        <td>${r.phone}</td>
-        <td>${r.jobTitle||''}</td>
-        <td><span class="rankmini ${rcls}">${rlabel}</span></td>
-        <td>${r.date||''}</td>
-        <td><span class="status ${statusClass(r.status)}">${r.status}</span></td>
-        <td>
-          <select onchange="updateStatus(${r['id']}, this.value)" style="padding:5px 7px;border:1.5px solid var(--line);border-radius:7px;font-family:inherit;font-size:11.5px">
-            <option ${r.status==='جديد'?'selected':''}>جديد</option>
-            <option ${r.status==='قيد المراجعة'?'selected':''}>قيد المراجعة</option>
-            <option ${r.status==='تمت المقابلة'?'selected':''}>تمت المقابلة</option>
-            <option ${r.status==='مقبول'?'selected':''}>مقبول</option>
-            <option ${r.status==='مرفوض'?'selected':''}>مرفوض</option>
-          </select>
-        </td>
-      </tr>`;
-    }).join('');
+    state.meds.push({id:nextId(),name,cat,batch,exp,qty,price,threshold:thr});
+    pushLog('إضافة دواء',name);
   }
-  updateRecStats();
+  persist('med'); closeModal(); renderMedTable(); refreshStats(); toast('✅ تم الحفظ');
+}
+function adjustStock(id){
+  const m=state.meds.find(x=>x.id===id);
+  $('modalBody').innerHTML = `
+    <h3>تعديل كمية — ${m.name}</h3>
+    <div class="rowf">
+      <div class="fld"><label>الكمية الحالية</label><input class="txt" value="${m.qty}" disabled></div>
+      <div class="fld"><label>التغيير (+/-)</label><input class="txt" id="adQty" type="number" placeholder="مثال: 10 أو -5"></div>
+    </div>
+    <div class="fld" style="margin-top:10px"><label>السبب</label><input class="txt" id="adWhy" placeholder="استلام / صرف / تعديل"></div>
+    <div class="modal-actions">
+      <button class="btn btn-teal" onclick="doAdjust(${id})">تطبيق</button>
+      <button class="btn btn-line" onclick="closeModal()">إلغاء</button>
+    </div>`;
+  $('modal').classList.add('open');
+}
+function doAdjust(id){
+  const d=parseInt($('adQty').value)||0, why=$('adWhy').value.trim()||'تعديل';
+  const m=state.meds.find(x=>x.id===id);
+  m.qty=Math.max(0,m.qty+d);
+  persist('med'); pushLog('تعديل مخزون',`${m.name}: ${d>0?'+':''}${d} (${why})`);
+  closeModal(); renderMedTable(); refreshStats(); toast('✅ تم التعديل');
+}
+function delMed(id){
+  const m=state.meds.find(x=>x.id===id);
+  if(!confirm('حذف "'+m.name+'"؟')) return;
+  state.meds=state.meds.filter(x=>x.id!==id);
+  persist('med'); pushLog('حذف دواء',m.name);
+  renderMedTable(); refreshStats(); toast('🗑️ تم الحذف');
 }
 
-function statusClass(s){
-  switch(s){
-    case 'جديد': return 's-new';
-    case 'قيد المراجعة': return 's-rev';
-    case 'تمت المقابلة': return 's-int';
-    case 'مقبول': return 's-ok';
-    case 'مرفوض': return 's-no';
-    default: return 's-new';
-  }
+/* ---------- وحدة: كتب الفحص ---------- */
+function renderExams(){
+  const mArea=$('moduleArea');
+  mArea.innerHTML = `
+    <div class="panel">
+      <div class="hd"><h3>📄 كتب الفحص</h3><button class="btn btn-gold" onclick="openExamModal()">+ كتاب جديد</button></div>
+      <div class="rowf" style="margin-bottom:12px"><div class="fld"><label>بحث</label><input class="txt" id="exQ" oninput="renderExamTable()" placeholder="🔍 المريض / الرمز"></div></div>
+      <div class="tblwrap"><table><thead><tr><th>الرمز</th><th>المريض</th><th>النتيجة</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="exBody"></tbody></table></div>
+    </div>`;
+  renderExamTable();
+}
+function renderExamTable(){
+  const q=($('exQ').value||'').trim().toLowerCase();
+  let list=state.exams.slice();
+  if(q) list=list.filter(x=>(x.code+x.patient).toLowerCase().includes(q));
+  const body=$('exBody');
+  if(!list.length){ body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">لا توجد كتب</td></tr>'; return; }
+  body.innerHTML=list.map(x=>`<tr>
+    <td><b>${x.code}</b></td><td>${x.patient}</td><td>${x.result}</td><td>${x.date}</td>
+    <td><span class="pill ${x.status==='جاهز'?'p-ok':'p-lw'}">${x.status}</span></td>
+    <td class="rowf" style="gap:5px">
+      <button class="btn btn-teal btn-sm" onclick="printExam(${x.id})">🖨️ طباعة</button>
+      <button class="btn btn-line btn-sm" onclick="openExamModal(${x.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="delExam(${x.id})">🗑️</button>
+    </td></tr>`).join('');
+}
+function openExamModal(id){
+  const x=id? state.exams.find(e=>e.id===id):null;
+  $('modalBody').innerHTML=`
+    <h3>${x?'تعديل كتاب':'كتاب فحص جديد'}</h3>
+    <div class="fld" style="margin-bottom:10px"><label>المريض</label><input class="txt" id="exName" value="${x?x.patient:''}"></div>
+    <div class="fld" style="margin-bottom:10px"><label>النتيجة</label><input class="txt" id="exResult" value="${x?x.result:''}"></div>
+    <div class="fld" style="margin-bottom:10px"><label>الحالة</label><select class="sel" id="exStatus"><option ${x&&x.status==='قيد الفحص'?'selected':''}>قيد الفحص</option><option ${x&&x.status==='جاهز'?'selected':''}>جاهز</option></select></div>
+    <div class="modal-actions"><button class="btn btn-teal" onclick="saveExam(${x?x.id:0})">💾 حفظ</button><button class="btn btn-line" onclick="closeModal()">إلغاء</button></div>`;
+  $('modal').classList.add('open');
+}
+function saveExam(id){
+  const patient=$('exName').value.trim(), result=$('exResult').value.trim(), status=$('exStatus').value;
+  if(!patient){ toast('أدخل اسم المريض', true); return; }
+  if(id){ const x=state.exams.find(e=>e.id===id); Object.assign(x,{patient,result,status}); }
+  else state.exams.push({id:nextId(), code:genCode('EX',state.exams.length+1001), patient, result, status, date:nowISO()});
+  persist('exam'); pushLog('حفظ كتاب فحص',patient);
+  closeModal(); renderExamTable(); toast('✅ تم الحفظ');
+}
+function delExam(id){
+  if(!confirm('حذف الكتاب؟')) return;
+  state.exams=state.exams.filter(x=>x.id!==id);
+  persist('exam'); pushLog('حذف كتاب فحص',String(id));
+  renderExamTable(); toast('🗑️ تم الحذف');
+}
+function printExam(id){
+  const x=state.exams.find(e=>e.id===id);
+  $('printArea').innerHTML=`
+    <button class="btn btn-line no-print" onclick="closePrint()" style="margin-bottom:20px">← رجوع</button>
+    <h2>📄 مكتب الفيض الدوائي العلمي</h2>
+    <p style="color:var(--muted);margin-bottom:16px">كتاب فحص مخبري — ${today()}</p>
+    <div class="docline"><span>رمز الكتاب</span><b>${x.code}</b></div>
+    <div class="docline"><span>المريض</span><b>${x.patient}</b></div>
+    <div class="docline"><span>النتيجة</span><b>${x.result}</b></div>
+    <div class="docline"><span>التاريخ</span><b>${x.date}</b></div>
+    <div class="docline"><span>الحالة</span><b>${x.status}</b></div>
+    <p style="margin-top:30px;border-top:1px dashed var(--gray);padding-top:14px;color:var(--muted);font-size:12px">توقيع المسؤول: ______________</p>`;
+  $('printArea').style.display='block';
+  setTimeout(()=>{ window.print(); },200);
+}
+function closePrint(){ $('printArea').style.display='none'; $('printArea').innerHTML=''; }
+
+/* ---------- وحدة: تجهيز البيع ---------- */
+function renderSales(){
+  const mArea=$('moduleArea');
+  mArea.innerHTML=`
+    <div class="panel">
+      <div class="hd"><h3>🛒 تجهيز البيع</h3><button class="btn btn-gold" onclick="openSellModal()">+ فاتورة جديدة</button></div>
+      <div class="rowf" style="margin-bottom:12px"><div class="fld"><label>بحث</label><input class="txt" id="slQ" oninput="renderSellTable()" placeholder="🔍 رقم الفاتورة / العميل"></div></div>
+      <div class="tblwrap"><table><thead><tr><th>الفاتورة</th><th>العميل</th><th>الأصناف</th><th>الإجمالي</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="slBody"></tbody></table></div>
+    </div>`;
+  renderSellTable();
+}
+function renderSellTable(){
+  const q=($('slQ').value||'').trim().toLowerCase();
+  let list=state.sells.slice();
+  if(q) list=list.filter(x=>(x.bill+x.customer).toLowerCase().includes(q));
+  const body=$('slBody');
+  if(!list.length){ body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">لا توجد فواتير</td></tr>'; return; }
+  body.innerHTML=list.map(x=>`<tr>
+    <td><b>${x.bill}</b></td><td>${x.customer}</td><td>${x.items.length}</td><td><b>${fmtN(x.total)}</b> د.ع</td><td>${x.date}</td>
+    <td><span class="pill ${x.status==='مكتمل'?'p-ok':'p-lw'}">${x.status}</span></td>
+    <td class="rowf" style="gap:5px"><button class="btn btn-teal btn-sm" onclick="printBill(${x.id})">🖨️ فاتورة</button><button class="btn btn-danger btn-sm" onclick="delSell(${x.id})">🗑️</button></td></tr>`).join('');
+}
+function openSellModal(){
+  const opts = state.meds.map(m=>`<option value="${m.id}">${m.name} (${m.qty} متوفر)</option>`).join('');
+  $('modalBody').innerHTML=`
+    <h3>فاتورة بيع جديدة</h3>
+    <div class="fld" style="margin-bottom:10px"><label>العميل</label><input class="txt" id="slCust" placeholder="اسم العميل"></div>
+    <div class="fld" style="margin-bottom:10px"><label>اختيار دواء</label><select class="sel" id="slMed">${opts}</select></div>
+    <div class="rowf" style="gap:10px">
+      <div class="fld"><label>الكمية</label><input class="txt" id="slQty" type="number" value="1"></div>
+      <div class="fld"><label>السعر (د.ع)</label><input class="txt" id="slPrice" type="number" placeholder="يفرّغ تلقائي"></div>
+      <button class="btn btn-teal btn-sm" style="align-self:flex-end" onclick="addItemToBill()">+ إضافة</button>
+    </div>
+    <div class="tblwrap" style="margin-top:12px"><table><thead><tr><th>الاسم</th><th>الكمية</th><th>السعر</th><th></th></tr></thead><tbody id="billItems"></tbody></table></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px"><b>الإجمالي:</b><b style="color:var(--teal)" id="billTotal">0 د.ع</b></div>
+    <div class="modal-actions"><button class="btn btn-gold" onclick="saveBill()">💾 إتمام الفاتورة</button><button class="btn btn-line" onclick="closeModal()">إلغاء</button></div>`;
+  $('modal').classList.add('open');
+  window._bill=[];
+  $('slMed').onchange=()=>{ const m=state.meds.find(x=>x.id===parseInt($('slMed').value)); if(m) $('slPrice').value=m.price; };
+}
+function addItemToBill(){
+  const m=state.meds.find(x=>x.id===parseInt($('slMed').value));
+  const qty=parseInt($('slQty').value)||1;
+  const price=parseInt($('slPrice').value)||m.price;
+  if(qty>m.qty){ toast('الكمية غير متوفرة!', true); return; }
+  const it={name:m.name, qty, price};
+  window._bill=window._bill||[];
+  const ex=window._bill.find(b=>b.name===it.name);
+  if(ex) ex.qty+=it.qty; else window._bill.push(it);
+  renderBillItems();
+}
+function renderBillItems(){
+  const b=window._bill||[];
+  $('billItems').innerHTML=b.map((it,i)=>`<tr><td>${it.name}</td><td>${it.qty}</td><td>${fmtN(it.price)}</td><td><button class="btn btn-danger btn-sm" onclick="window._bill.splice(${i},1);renderBillItems()">✕</button></td></tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--muted)">لا أصناف</td></tr>';
+  $('billTotal').textContent = fmtN(b.reduce((s,it)=>s+it.qty*it.price,0))+' د.ع';
+}
+function saveBill(){
+  const cust=$('slCust').value.trim()||'عميل نقدي';
+  const b=window._bill||[];
+  if(!b.length){ toast('أضف صنف واحد على الأقل', true); return; }
+  // خصم الكميات
+  b.forEach(it=>{ const m=state.meds.find(x=>x.name===it.name); if(m) m.qty=Math.max(0,m.qty-it.qty); });
+  const total=b.reduce((s,it)=>s+it.qty*it.price,0);
+  state.sells.unshift({id:nextId(), bill:genCode('BILL',state.sells.length+1), customer:cust, items:b, total, date:nowISO(), status:'مكتمل'});
+  persist('med'); persist('sell');
+  pushLog('فاتورة بيع',`${cust} — ${fmtN(total)} د.ع`);
+  closeModal(); renderSellTable(); refreshStats(); toast('✅ تم إتمام الفاتورة');
+}
+function delSell(id){
+  if(!confirm('حذف الفاتورة؟')) return;
+  state.sells=state.sells.filter(x=>x.id!==id);
+  persist('sell'); pushLog('حذف فاتورة',String(id));
+  renderSellTable(); refreshStats(); toast('🗑️ تم الحذف');
+}
+function printBill(id){
+  const x=state.sells.find(s=>s.id===id);
+  $('printArea').innerHTML=`
+    <button class="btn btn-line no-print" onclick="closePrint()" style="margin-bottom:20px">← رجوع</button>
+    <h2>💊 مكتب الفيض الدوائي العلمي</h2>
+    <p style="color:var(--muted)">فاتورة بيع — ${today()}</p>
+    <div class="docline"><span>رقم الفاتورة</span><b>${x.bill}</b></div>
+    <div class="docline"><span>العميل</span><b>${x.customer}</b></div>
+    <table style="margin-top:16px"><thead><tr><th>الاسم</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>${x.items.map(it=>`<tr><td>${it.name}</td><td>${it.qty}</td><td>${fmtN(it.price)}</td><td>${fmtN(it.qty*it.price)}</td></tr>`).join('')}</tbody></table>
+    <div style="text-align:left;margin-top:12px"><b>الإجمالي: ${fmtN(x.total)} د.ع</b></div>`;
+  $('printArea').style.display='block';
+  setTimeout(()=>window.print(),200);
 }
 
-/* ---- تحديث حالة سجل ---- */
-function updateStatus(id, status){
-  const r = records.find(x=>x.id===id);
-  if(r){ r.status = status; saveRecords(); renderRecords(); toast('تم تحديث الحالة'); }
+/* ---------- وحدة: الحسابات والديون ---------- */
+function renderAccounts(){
+  const mArea=$('moduleArea');
+  const total = state.accs.reduce((s,a)=>s+a.amount,0);
+  const due = state.accs.filter(a=>a.status==='مستحقة').reduce((s,a)=>s+a.amount,0);
+  mArea.innerHTML=`
+    <div class="grid g-2">
+      <div class="panel"><div class="lb" style="font-size:12px;color:var(--muted)">إجمالي الحسابات</div><div class="vl" style="font-size:30px;font-weight:800;color:var(--navy)">${fmtN(total)} د.ع</div></div>
+      <div class="panel"><div class="lb" style="font-size:12px;color:var(--muted)">ديون مستحقة</div><div class="vl" style="font-size:30px;font-weight:800;color:var(--red)">${fmtN(due)} د.ع</div></div>
+    </div>
+    <div class="panel">
+      <div class="hd"><h3>💰 الحسابات والديون</h3><button class="btn btn-gold" onclick="openAccModal()">+ حساب جديد</button></div>
+      <div class="rowf" style="margin-bottom:12px"><div class="fld"><label>بحث</label><input class="txt" id="acQ" oninput="renderAccTable()" placeholder="🔍 الاسم / النوع"></div></div>
+      <div class="tblwrap"><table><thead><tr><th>الاسم</th><th>النوع</th><th>المبلغ</th><th>الاستحقاق</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="acBody"></tbody></table></div>
+    </div>`;
+  renderAccTable();
+}
+function renderAccTable(){
+  const q=($('acQ').value||'').trim().toLowerCase();
+  let list=state.accs.slice();
+  if(q) list=list.filter(x=>(x.name+x.type).toLowerCase().includes(q));
+  const body=$('acBody');
+  if(!list.length){ body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">لا حسابات</td></tr>'; return; }
+  body.innerHTML=list.map(a=>`<tr>
+    <td><b>${a.name}</b></td>
+    <td><span class="pill ${a.type==='عميل'?'p-new':'p-inf'}">${a.type}</span></td>
+    <td><b>${fmtN(a.amount)}</b> د.ع</td><td>${a.due}</td>
+    <td><span class="pill ${a.status==='مستحقة'?'p-lw':'p-ok'}">${a.status}</span></td>
+    <td class="rowf" style="gap:5px">
+      <button class="btn btn-teal btn-sm" onclick="toggleAccStatus(${a.id})">${a.status==='مستحقة'?'💵 تسديد':'↩️ إعادة'}</button>
+      <button class="btn btn-line btn-sm" onclick="openAccModal(${a.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="delAcc(${a.id})">🗑️</button>
+    </td></tr>`).join('');
+}
+function openAccModal(id){
+  const a=id? state.accs.find(x=>x.id===id):null;
+  $('modalBody').innerHTML=`
+    <h3>${a?'تعديل حساب':'حساب جديد'}</h3>
+    <div class="fld" style="margin-bottom:10px"><label>الاسم</label><input class="txt" id="acName" value="${a?a.name:''}"></div>
+    <div class="rowf" style="gap:10px;margin-bottom:10px">
+      <div class="fld"><label>النوع</label><select class="sel" id="acType"><option ${a&&a.type==='عميل'?'selected':''}>عميل</option><option ${a&&a.type==='مورد'?'selected':''}>مورد</option></select></div>
+      <div class="fld"><label>المبلغ</label><input class="txt" id="acAmt" type="number" value="${a?a.amount:''}"></div>
+    </div>
+    <div class="fld"><label>تاريخ الاستحقاق</label><input class="txt" id="acDue" type="date" value="${a?a.due:''}"></div>
+    <div class="modal-actions"><button class="btn btn-teal" onclick="saveAcc(${a?a.id:0})">💾 حفظ</button><button class="btn btn-line" onclick="closeModal()">إلغاء</button></div>`;
+  $('modal').classList.add('open');
+}
+function saveAcc(id){
+  const name=$('acName').value.trim(), type=$('acType').value, amt=parseInt($('acAmt').value)||0, due=$('acDue').value;
+  if(!name){ toast('أدخل الاسم', true); return; }
+  if(id){ const a=state.accs.find(x=>x.id===id); Object.assign(a,{name,type,amount:amt,due}); }
+  else state.accs.push({id:nextId(),name,type,amount:amt,due,status:'مستحقة'});
+  persist('acc'); pushLog('حساب/دين',`${name} — ${fmtN(amt)} د.ع`);
+  closeModal(); renderAccTable(); refreshStats(); toast('✅ تم الحفظ');
+}
+function toggleAccStatus(id){
+  const a=state.accs.find(x=>x.id===id);
+  a.status = a.status==='مستحقة'? 'مسددة':'مستحقة';
+  persist('acc'); pushLog('تحديث دين',`${a.name} → ${a.status}`);
+  renderAccTable(); refreshStats(); toast('✅ تم التحديث');
+}
+function delAcc(id){
+  if(!confirm('حذف الحساب؟')) return;
+  state.accs=state.accs.filter(x=>x.id!==id);
+  persist('acc'); pushLog('حذف حساب',String(id));
+  renderAccTable(); refreshStats(); toast('🗑️ تم الحذف');
 }
 
-/* ---- إحصاءات الهيرو ---- */
-function updateHeroStats(){
-  document.getElementById('stJobs').textContent = JOBS.length;
-  document.getElementById('stR1').textContent = JOBS.filter(j=>j.rank===1).length;
-  document.getElementById('stRecs').textContent = records.length;
-  document.getElementById('stNew').textContent = records.filter(r=>r.status==='جديد').length;
+/* ---------- وحدة: سجل الحركات ---------- */
+function renderLog(){
+  const mArea=$('moduleArea');
+  mArea.innerHTML=`
+    <div class="panel">
+      <div class="hd"><h3>📋 سجل الحركات</h3><button class="btn btn-line btn-sm" onclick="state.log=[];persist('log');renderLog();toast('تم مسح السجل')">🗑️ مسح السجل</button></div>
+      <div class="tblwrap"><table><thead><tr><th>التاريخ/الوقت</th><th>المستخدم</th><th>الحركة</th><th>التفاصيل</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    </div>`;
+  const body=$('logBody');
+  if(!state.log.length){ body.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--muted)">لا حركات</td></tr>'; return; }
+  body.innerHTML=state.log.map(l=>`<tr><td>${new Date(l.time).toLocaleString('ar-IQ')}</td><td>${l.user}</td><td><span class="pill p-inf">${l.action}</span></td><td>${l.detail}</td></tr>`).join('');
 }
 
-/* ---- إحصاءات السجلات ---- */
-function updateRecStats(){
-  document.getElementById('rsTotal').textContent = records.length;
-  document.getElementById('rsNew').textContent = records.filter(r=>r.status==='جديد').length;
-  document.getElementById('rsOk').textContent = records.filter(r=>r.status==='مقبول').length;
-  document.getElementById('rsNo').textContent = records.filter(r=>r.status==='مرفوض').length;
+/* ---------- dispatch ---------- */
+function renderModule(key){
+  ({medicines:renderMedicines, exams:renderExams, sales:renderSales, accounts:renderAccounts, log:renderLog})[key]();
 }
 
-/* ---- تصدير CSV ---- */
-function exportRecs(){
-  if(!records.length){ toast('لا توجد سجلات للتصدير', true); return; }
-  const head = ["الاسم","الهاتف","الوظيفة","الرتبة","التاريخ","الحالة"];
-  const rows = records.map(r=>[r.name,r.phone,r.jobTitle||'',RANKS[r.rank]?RANKS[r.rank].short:'',r.date||'',r.status]);
-  const csv = [head, ...rows].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8;"});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'rafidain-records.csv';
-  document.body.appendChild(a); a.click(); a.remove();
-  toast('📤 تم تصدير السجلات');
-}
+/* ---------- أدوات ---------- */
+function nextId(){ return Date.now()+Math.floor(Math.random()*1000); }
+function genCode(prefix,n){ return prefix+'-'+String(n).padStart(4,'0'); }
+function closeModal(){ $('modal').classList.remove('open'); $('modalBody').innerHTML=''; }
 
-/* ---- الرسائل (Toast) ---- */
+/* ---------- Toast ---------- */
 let toastTimer=null;
-function toast(msg, bad){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.toggle('bad', !!bad);
-  t.classList.add('show');
+function toast(msg,bad,ok){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast show'+(bad?' bad':(ok?' ok':''));
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
 }
 
-/* ---- تشغيل ---- */
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadRecords();
-  renderJobs();
-  updateRecStats();
+/* ---------- تشغيل ---------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  initData();
+  const s=load(LS.session,null);
+  if(s){ state.session=s; enterApp(); }
+  else {
+    $('authView').style.display='';
+    $('appView').style.display='none';
+    authTab('login');
+  }
 });
 </script>
 </body>
