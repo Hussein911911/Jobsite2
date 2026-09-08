@@ -28,11 +28,27 @@
     toastTimer = setTimeout(function () { t.className = 'toast'; }, 3200);
   }
 
-  /* ── شارة الرتبة ── */
-  function rankBadge(rank) {
-    var R = JobsSite.RANKS[rank] || JobsSite.RANKS[5];
+  /* ── شارات الرتب والحالات (تقرأ من قاعدة البيانات إن كانت جاهزة) ── */
+  function rankBadge(rankId) {
+    var R = (JobsSite.db && JobsSite.db.rankOf) ? JobsSite.db.rankOf(rankId) : null;
+    if (!R) {
+      var f = JobsSite.FALLBACK_RANKS[rankId] || JobsSite.FALLBACK_RANKS[5];
+      R = { short: f.short, css_class: f.cls, name: f.name };
+    }
     var label = R.name.indexOf('—') > -1 ? R.name.split('—')[1].trim() : R.name;
-    return '<span class="rbadge ' + R.cls + '">⭐ ' + esc(R.short) + ' — ' + esc(label) + '</span>';
+    return '<span class="rbadge ' + esc(R.css_class) + '">⭐ ' + esc(R.short) + ' — ' + esc(label) + '</span>';
+  }
+
+  function statusBadge(status) {
+    var S = status;
+    if (typeof status === 'number' || typeof status === 'string') {
+      S = (JobsSite.db && JobsSite.db.statusOf) ? JobsSite.db.statusOf(status) : null;
+      if (!S) {
+        S = JobsSite.FALLBACK_STATUSES.filter(function (s) { return s.id === Number(status); })[0] || JobsSite.FALLBACK_STATUSES[0];
+        S = { name: S.name, css_class: S.cls };
+      }
+    }
+    return '<span class="status ' + esc(S.css_class || 's-new') + '">' + esc(S.name) + '</span>';
   }
 
   /* ── التاريخ والوقت ── */
@@ -105,7 +121,8 @@
 
   JobsSite.utils = {
     esc: esc, qs: qs, qsa: qsa, toast: toast,
-    rankBadge: rankBadge, nowStamp: nowStamp, todayISO: todayISO,
+    rankBadge: rankBadge, statusBadge: statusBadge,
+    nowStamp: nowStamp, todayISO: todayISO,
     daysLeft: daysLeft, deadlineText: deadlineText,
     normalizePhone: normalizePhone, isValidPhone: isValidPhone, isValidEmail: isValidEmail,
     setFieldError: setFieldError, csvCell: csvCell

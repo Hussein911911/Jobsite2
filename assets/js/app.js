@@ -8,7 +8,7 @@
 (function (global) {
   'use strict';
   var JobsSite = global.JobsSite;
-  var u = JobsSite.utils, store = JobsSite.store, CONFIG = JobsSite.CONFIG;
+  var u = JobsSite.utils, CONFIG = JobsSite.CONFIG;
 
   var views = {}, els = {};
   var currentJobId = null;
@@ -20,21 +20,20 @@
       return h || '/jobs';
     },
     go: function (path) {
-      if (global.location.hash === '#' + path) resolve();   /* نفس المسار → أعد الرسم */
+      if (global.location.hash === '#' + path) resolve();
       else global.location.hash = '#' + path;
     },
     currentJobId: function () { return currentJobId; }
   };
 
-  function resolve() {
-    var path = router.path();
-    var parts = path.split('/').filter(Boolean);   /* ['jobs'] | ['job','3'] | ['records'] */
+  async function resolve() {
+    var parts = router.path().split('/').filter(Boolean);
 
     if (parts[0] === 'records') {
       showView('records');
       currentJobId = null;
-      views.records.show();
       setNav('records');
+      views.records.show();
       document.title = 'السجلات — ' + CONFIG.company;
       return;
     }
@@ -42,15 +41,15 @@
     if (parts[0] === 'job' && parts[1]) {
       showView('jobs');
       currentJobId = Number(parts[1]);
-      views.jobs.detail(currentJobId);
       setNav('jobs');
+      await views.jobs.detail(currentJobId);
       return;
     }
 
     showView('jobs');
     currentJobId = null;
-    views.jobs.list();
     setNav('jobs');
+    await views.jobs.list();
     document.title = 'شركة الرافدين — موقع الوظائف (الرتب والسجلات)';
   }
 
@@ -64,7 +63,31 @@
     els.navRec.classList.toggle('on', name === 'records');
   }
 
-  /* ─────────── بيانات التواصل (من config.js) ─────────── */
+  /* ─────────── الإحصاءات ─────────── */
+  async function refreshStats() {
+    try {
+      var s = await JobsSite.db.stats();
+      u.qs('#stJobs').textContent = s.jobs_open;
+      u.qs('#stR1').textContent = s.jobs_rank1;
+      u.qs('#stRecs').textContent = s.applicants_total;
+      u.qs('#stNew').textContent = s.applicants_new;
+    } catch (e) {
+      u.toast('تعذّر تحميل الإحصاءات: ' + e.message, false);
+    }
+  }
+
+  /* ─────────── حالة قاعدة البيانات في الفوتر ─────────── */
+  function showDbMeta() {
+    var m = JobsSite.db.meta();
+    var el = u.qs('#dbMeta');
+    if (!el) return;
+    el.textContent = '💾 قاعدة البيانات: ' +
+      (m.remote ? 'سيرفر (' + CONFIG.apiBaseUrl + ')' : 'محلية (localStorage)') +
+      ' — المخطط v' + m.schema_version;
+    if (!m.persistent) el.textContent += ' ⚠️ التخزين معطّل';
+  }
+
+  /* ─────────── بيانات التواصل ─────────── */
   function fillContact() {
     var phone = u.qs('#fPhone'), email = u.qs('#fEmail'), addr = u.qs('#fAddr');
     if (phone) { phone.textContent = '📞 ' + CONFIG.phone; phone.href = 'tel:' + CONFIG.phone.replace(/\s/g, ''); }
@@ -74,53 +97,48 @@
     if (year) year.textContent = new Date().getFullYear();
   }
 
-  /* ─────────── الإحصاءات ─────────── */
-  function renderStats() {
-    var s = store.stats();
-    u.qs('#stJobs').textContent = s.openJobs;
-    u.qs('#stR1').textContent = s.rank1;
-    u.qs('#stRecs').textContent = s.records;
-    u.qs('#stNew').textContent = s.newRecords;
-  }
-
   /* ─────────── التشغيل ─────────── */
-  function init() {
+  async function init() {
     els.jobs = u.qs('#viewJobs');
     els.records = u.qs('#viewRecords');
     els.navJobs = u.qs('#navJobs');
     els.navRec = u.qs('#navRec');
 
+    /* 1) تشغيل قاعدة البيانات (الترحيلات + التعبئة) */
+    try {
+      await JobsSite.db.init();
+    } catch (e) {
+      u.toast('تعذّر تشغيل قاعدة البيانات: ' + e.message, false);
+    }
+
     views.jobs = JobsSite.views.jobs;
     views.records = JobsSite.views.records;
 
-    views.jobs.bind();
-    views.records.bind();
+    /* 2) ربط الواجهات بقاعدة البيانات */
+    await views.jobs.bind();
+    await views.records.bind();
 
-    /* أزرار التنقل (تفويض) */
+    /* 3) التنقل */
     u.qsa('[data-route]').forEach(function (btn) {
       btn.addEventListener('click', function () { router.go(btn.dataset.route); });
     });
     u.qs('#btnApplyTop').addEventListener('click', function () { views.jobs.showTop(); });
-
-    /* بيانات التواصل والفوتر من ملف الإعدادات */
-    fillContact();
-
     global.addEventListener('hashchange', resolve);
 
-    renderStats();
-    resolve();
+    fillContact();
+    showDbMeta();
+    await refreshStats();
+    await resolve();
 
-    if (!store.isPersistent) {
-      u.toast('⚠️ التخزين معطّل في هذا المتصفح — البيانات مؤقتة', false);
-    }
+    var m = JobsSite.db.meta();
+    if (!m.persistent) u.toast('⚠️ التخزين معطّل في هذا المتصفح — البيانات مؤقتة', false);
+
+    global.JobsSiteReady = true;
   }
 
   JobsSite.router = router;
-  JobsSite.app = { renderStats: renderStats, init: init };
+  JobsSite.app = { refreshStats: refreshStats, init: init };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })(window);
