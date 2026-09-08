@@ -1,0 +1,13 @@
+{
+  "name": "jobsite2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "موقع وظائف شركة الرافدين — نظام الرتب والسجلات (واجهة ثابتة بدون سيرفر)",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/smoke.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شركة الرافدين — موقع الوظائف (الرتب والسجلات)</title>
+<meta name="description" content="موقع وظائف شركة الرافدين: تصفح الوظائف الشاغرة حسب الرتبة الوظيفية، وقدّم طلبك، ومتابعة السجلات من لوحة الإدارة.">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ══════════════ الشريط العلوي ══════════════ -->
+<header class="pnav">
+  <div class="container in">
+    <button class="brand" data-route="/jobs" type="button">
+      <span class="ico" aria-hidden="true">🏢</span>
+      <span>شركة الرافدين<small>للاستثمار والخدمات</small></span>
+    </button>
+    <nav aria-label="التنقل الرئيسي">
+      <button id="navJobs" class="navbtn on" type="button" data-route="/jobs">📋 الوظائف</button>
+      <button id="navRec" class="navbtn" type="button" data-route="/records">🗂️ السجلات</button>
+      <button id="btnApplyTop" class="navbtn gold" type="button">➕ سجّل الآن</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ══════════════ الهيرو ══════════════ -->
+<section class="hero">
+  <div class="container">
+    <h1>انضم إلى فريق شركة الرافدين 👋</h1>
+    <p>نظام الرتب الوظيفي: كل وظيفة لها رتبة محددة — من الإدارة العليا إلى المبتدئين — وسجلات التقديم تُدوّن وتُتابع بمراحلها.</p>
+    <div class="stats">
+      <div class="st"><b id="stJobs">0</b><span>وظيفة شاغرة</span></div>
+      <div class="st"><b id="stR1">0</b><span>رتبة أولى (إدارة)</span></div>
+      <div class="st"><b id="stRecs">0</b><span>سجل تقديم</span></div>
+      <div class="st"><b id="stNew">0</b><span>سجلات جديدة</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ عرض الوظائف ══════════════ -->
+<main id="viewJobs">
+  <div class="container">
+    <div class="filters" id="jobsFilters">
+      <label class="sr-only" for="searchQ">بحث في الوظائف</label>
+      <input id="searchQ" type="search" placeholder="🔍 ابحث: وظيفة، قسم، مكان...">
+      <label class="sr-only" for="rankF">فلترة حسب الرتبة</label>
+      <select id="rankF">
+        <option value="">كل الرتب</option>
+        <option value="1">⭐ الرتبة الأولى — إدارة عليا</option>
+        <option value="2">⭐⭐ الرتبة الثانية — إدارة وسطى</option>
+        <option value="3">⭐⭐⭐ الرتبة الثالثة — إشراف</option>
+        <option value="4">⭐⭐⭐⭐ الرتبة الرابعة — تنفيذي</option>
+        <option value="5">⭐⭐⭐⭐⭐ الرتبة الخامسة — مبتدئ</option>
+      </select>
+      <button id="btnTop" class="btn btn-navy btn-sm" type="button">⬆ للوظيفة الأعلى رتبة</button>
+    </div>
+    <div id="jobsGrid" class="job-grid"></div>
+    <div id="jobDetailBox" style="display:none"></div>
+  </div>
+</main>
+
+<!-- ══════════════ السجلات (بوابة رمز الدخول) ══════════════ -->
+<section id="viewRecords" style="display:none">
+  <div class="container">
+
+    <!-- البوابة -->
+    <div id="gateBox">
+      <div class="gate">
+        <div class="gatecard">
+          <div class="ico" aria-hidden="true">🔐</div>
+          <h3>منطقة السجلات</h3>
+          <p>هذه المنطقة خاصة بإدارة الشركة — أدخل رمز الدخول</p>
+          <label class="sr-only" for="pinInput">رمز الدخول</label>
+          <input id="pinInput" type="password" placeholder="••••" maxlength="8" autocomplete="off">
+          <button id="btnGate" class="btn btn-navy" style="width:100%;margin-top:12px" type="button">دخول</button>
+          <div class="gate-err" id="gateErr" role="alert">الرمز غير صحيح — حاول مرة أخرى</div>
+          <div class="gate-hint">🔑 <b>رمز تجريبي:</b> 1234<br>(في النسخة الحقيقية يُدار عبر لوحة إدارة محمية على السيرفر)</div>
+          <p style="margin-top:12px"><a href="#/jobs" style="color:var(--navy);font-size:12.5px;font-weight:700">← رجوع للوظائف</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- اللوحة -->
+    <div id="recordsBox" style="display:none">
+      <div class="recstats">
+        <div class="rcard"><div class="lb">🗂️ كل السجلات</div><div class="vl" id="rsTotal">0</div></div>
+        <div class="rcard"><div class="lb">🆕 جديد</div><div class="vl" style="color:var(--blue)" id="rsNew">0</div></div>
+        <div class="rcard"><div class="lb">✅ مقبول</div><div class="vl" style="color:var(--green)" id="rsOk">0</div></div>
+        <div class="rcard"><div class="lb">❌ مرفوض</div><div class="vl" style="color:var(--red)" id="rsNo">0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="hd">
+          <h3>📋 سجلات المتقدمين</h3>
+          <div class="sels">
+            <label class="sr-only" for="recRankF">فلترة بالرتبة</label>
+            <select id="recRankF">
+              <option value="">كل الرتب</option>
+              <option value="1">الرتبة الأولى</option><option value="2">الرتبة الثانية</option>
+              <option value="3">الرتبة الثالثة</option><option value="4">الرتبة الرابعة</option>
+              <option value="5">الرتبة الخامسة</option>
+            </select>
+            <label class="sr-only" for="recStatusF">فلترة بالحالة</label>
+            <select id="recStatusF">
+              <option value="">كل الحالات</option>
+              <option>جديد</option><option>قيد المراجعة</option><option>تمت المقابلة</option><option>مقبول</option><option>مرفوض</option>
+            </select>
+            <label class="sr-only" for="recSearch">بحث في السجلات</label>
+            <input id="recSearch" type="search" placeholder="بحث بالاسم/الهاتف...">
+            <button id="btnExport" class="btn btn-gold btn-sm" type="button">📤 تصدير CSV</button>
+            <button id="btnResetData" class="btn btn-line btn-sm" type="button">↺ استعادة البيانات</button>
+            <button id="btnLock" class="btn btn-line btn-sm" type="button">🔒 قفل</button>
+          </div>
+        </div>
+        <div class="tblwrap">
+          <table>
+            <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الوظيفة</th><th>الرتبة</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
+            <tbody id="recBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ الفوتر ══════════════ -->
+<footer class="pfoot">
+  <div class="container">
+    <div class="cols">
+      <div>
+        <h4>🏢 شركة الرافدين</h4>
+        <p>منذ 2010 نعمل في الاستثمار والخدمات العامة — فريقنا هو أساس نجاحنا، ونظام الرتب يضمن مساراً واضحاً لكل موظف.</p>
+      </div>
+      <div>
+        <h4>روابط</h4>
+        <a class="link" href="#/jobs">الوظائف الشاغرة</a>
+        <a class="link" href="#/records">سجلات التقديم</a>
+      </div>
+      <div>
+        <h4>التواصل</h4>
+        <a id="fPhone" href="#"></a>
+        <a id="fEmail" href="#"></a>
+        <a id="fAddr">📍 <span></span></a>
+      </div>
+    </div>
+    <div class="bot">© <span id="fYear"></span> شركة الرافدين — جميع الحقوق محفوظة</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ══════════════ السكربتات (بالترتيب) ══════════════ -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/seed.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/views/jobs.js"></script>
+<script src="assets/js/views/records.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
