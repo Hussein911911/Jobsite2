@@ -121,6 +121,23 @@
         </div>
       </div>
 
+      <div class="panel" id="panelJobs">
+        <div class="hd">
+          <h3>🧩 إدارة الوظائف</h3>
+          <div class="sels">
+            <button id="btnAddJob" class="btn btn-navy btn-sm" type="button">➕ إضافة وظيفة</button>
+            <button id="btnReloadJobs" class="btn btn-line btn-sm" type="button">↻ تحديث</button>
+          </div>
+        </div>
+        <div id="jobFormBox" style="display:none"></div>
+        <div class="tblwrap">
+          <table>
+            <thead><tr><th>#</th><th>الوظيفة</th><th>الرتبة</th><th>القسم</th><th>الراتب</th><th>آخر موعد</th><th>الحالة</th><th>إجراء</th></tr></thead>
+            <tbody id="jobsAdminBody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="hd"><h3>⏱ آخر تغييرات الحالات</h3><span class="muted">سجل تدقيق (Audit) من جدول status_history</span></div>
         <div class="tblwrap">

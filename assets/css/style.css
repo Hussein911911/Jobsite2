@@ -101,6 +101,10 @@ button,input,select,textarea{font-family:inherit}
 .apply input,.apply textarea{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13.5px}
 .apply input:focus,.apply textarea:focus{outline:none;border-color:var(--gold)}
 .apply .row{display:flex;gap:10px;flex-wrap:wrap}
+.apply select{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff;color:var(--text)}
+.apply select:focus{outline:none;border-color:var(--gold)}
+#jobFormBox{margin-bottom:16px}
+#panelJobs .tblwrap{margin-top:6px}
 .apply .row>div{flex:1;min-width:220px}
 .apply .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
 .field-error{display:none;color:var(--red);font-size:12px;margin-top:4px}

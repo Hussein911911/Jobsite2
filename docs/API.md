@@ -63,8 +63,23 @@ WHERE (:rank_id IS NULL OR rank_id = :rank_id)
 ORDER BY rank_id, id LIMIT :limit OFFSET :offset;
 ```
 
-### `GET /api/jobs/:id` · `POST /api/jobs` · `PATCH /api/jobs/:id` · `DELETE /api/jobs/:id`
-الإنشاء والتعديل يتحققان من الصلاحية (مدير فقط). الحذف يمسح السجلات المرتبطة (`ON DELETE CASCADE`).
+### `GET /api/jobs/:id` — تفاصيل وظيفة (عام)
+
+### `POST /api/jobs` — إضافة وظيفة (مدير فقط)
+```json
+{ "title": "محاسب", "rank_id": 4, "dept": "المالية", "location": "بغداد",
+  "employment_type": "دوام كامل", "salary_text": "900,000 – 1,300,000 د.ع",
+  "salary_min": 900000, "salary_max": 1300000, "deadline": "2026-12-31",
+  "description": "...", "requirements": "...", "is_active": 1 }
+```
+التحقق: العنوان ≥ 3 أحرف، `rank_id` موجود بجدول الرتب، `deadline` بصيغة `YYYY-MM-DD`،
+و`salary_min <= salary_max`.
+
+### `PATCH /api/jobs/:id` — تعديل (مدير فقط، حقول جزئية مقبولة)
+### `DELETE /api/jobs/:id` — حذف (مدير فقط)
+يمسح سجلات المتقدمين المرتبطة تلقائياً عبر `ON DELETE CASCADE`.
+
+> الواجهة فيها **لوحة إدارة الوظائف** جاهزة (إضافة/تعديل/إغلاق/حذف) داخل منطقة السجلات.
 
 ---
 

@@ -9,6 +9,7 @@
 
   var UNLOCK_KEY = 'rajd_records_unlocked';
   var gateEl, panelEl, pinEl, errEl, bodyEl, rankEl, statusEl, searchEl, historyEl;
+  var jobsBodyEl, jobFormEl;
   var unlocked = false;
 
   function isUnlocked() {
@@ -59,6 +60,7 @@
     gateEl.style.display = 'none';
     panelEl.style.display = 'block';
     renderRecords();
+    renderJobsAdmin();
   }
 
   function showGate() {
@@ -123,6 +125,158 @@
       : '<tr><td colspan="4" class="muted" style="text-align:center;padding:16px">لا تغييرات مسجّلة</td></tr>';
   }
 
+  /* ═══════════ إدارة الوظائف ═══════════ */
+  async function renderJobsAdmin() {
+    if (!jobsBodyEl) return;
+    try {
+      var list = await JobsSite.db.jobs.all();
+      jobsBodyEl.innerHTML = list.length ? list.map(jobRowHTML).join('')
+        : '<tr><td colspan="8" class="muted" style="text-align:center;padding:18px">لا توجد وظائف — أضف وظيفتك الأولى</td></tr>';
+    } catch (e) {
+      jobsBodyEl.innerHTML = '<tr><td colspan="8" class="muted" style="text-align:center;padding:18px">تعذّر تحميل الوظائف: ' + u.esc(e.message) + '</td></tr>';
+    }
+  }
+
+  function jobRowHTML(j) {
+    return '<tr>' +
+      '<td class="muted">' + j.id + '</td>' +
+      '<td><b>' + u.esc(j.title) + '</b><div class="muted">📍 ' + u.esc(j.location) + '</div></td>' +
+      '<td>' + u.rankBadge(j.rank_id) + '</td>' +
+      '<td class="muted">' + u.esc(j.dept) + '</td>' +
+      '<td class="muted">' + u.esc(j.salary_text || '—') + '</td>' +
+      '<td class="muted">' + u.esc(j.deadline || 'مفتوح') + '</td>' +
+      '<td>' + (j.is_active ? '<span class="status s-ok">مفتوحة</span>' : '<span class="status s-no">مغلقة</span>') + '</td>' +
+      '<td><div class="sels">' +
+        '<button class="btn btn-sm btn-line" data-job-action="edit" data-id="' + j.id + '">✏️ تعديل</button>' +
+        '<button class="btn btn-sm btn-line" data-job-action="toggle" data-id="' + j.id + '">' + (j.is_active ? '🔒 إغلاق' : '🔓 فتح') + '</button>' +
+        '<button class="btn btn-sm btn-danger" data-job-action="delete" data-id="' + j.id + '">حذف</button>' +
+      '</div></td>' +
+    '</tr>';
+  }
+
+  async function openJobForm(id) {
+    var job = id ? await JobsSite.db.jobs.find(id) : null;
+    var ranks = await JobsSite.db.ranks.all();
+    var v = function (k, d) { return job ? (job[k] === null || job[k] === undefined ? d : job[k]) : d; };
+
+    jobFormEl.style.display = 'block';
+    jobFormEl.innerHTML =
+      '<form class="apply" id="jobForm" data-job-id="' + (job ? job.id : '') + '" novalidate>' +
+        '<h3>' + (job ? '✏️ تعديل: ' + u.esc(job.title) : '➕ وظيفة جديدة') + '</h3>' +
+        '<div class="row">' +
+          '<div><label for="jbTitle">عنوان الوظيفة *</label>' +
+            '<input id="jbTitle" value="' + u.esc(v('title', '')) + '" placeholder="مثال: محاسب">' +
+            '<div class="field-error"></div></div>' +
+          '<div><label for="jbRank">الرتبة *</label>' +
+            '<select id="jbRank">' + ranks.map(function (r) {
+              return '<option value="' + r.id + '"' + (Number(v('rank_id', 5)) === Number(r.id) ? ' selected' : '') + '>' + u.esc(r.name) + '</option>';
+            }).join('') + '</select></div>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div><label for="jbDept">القسم</label><input id="jbDept" value="' + u.esc(v('dept', '—')) + '"></div>' +
+          '<div><label for="jbLoc">المكان</label><input id="jbLoc" value="' + u.esc(v('location', '—')) + '"></div>' +
+          '<div><label for="jbType">نوع الدوام</label><input id="jbType" value="' + u.esc(v('employment_type', 'دوام كامل')) + '"></div>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div><label for="jbSalText">الراتب (نص)</label><input id="jbSalText" value="' + u.esc(v('salary_text', '')) + '" placeholder="700,000 – 1,000,000 د.ع"></div>' +
+          '<div><label for="jbSalMin">الحد الأدنى</label><input id="jbSalMin" type="number" min="0" value="' + u.esc(v('salary_min', '')) + '"></div>' +
+          '<div><label for="jbSalMax">الحد الأعلى</label><input id="jbSalMax" type="number" min="0" value="' + u.esc(v('salary_max', '')) + '"></div>' +
+        '</div>' +
+        '<div class="row">' +
+          '<div><label for="jbDeadline">آخر موعد للتقديم</label><input id="jbDeadline" type="date" value="' + u.esc(v('deadline', '')) + '"></div>' +
+          '<div><label for="jbActive">الحالة</label><select id="jbActive">' +
+            '<option value="1"' + (Number(v('is_active', 1)) === 1 ? ' selected' : '') + '>مفتوحة</option>' +
+            '<option value="0"' + (Number(v('is_active', 1)) === 0 ? ' selected' : '') + '>مغلقة</option>' +
+          '</select></div>' +
+        '</div>' +
+        '<label for="jbDesc">وصف الوظيفة</label><textarea id="jbDesc" rows="3">' + u.esc(v('description', '')) + '</textarea>' +
+        '<label for="jbReq">الشروط المطلوبة</label><textarea id="jbReq" rows="2">' + u.esc(v('requirements', '')) + '</textarea>' +
+        '<div class="actions">' +
+          '<button type="submit" class="btn btn-navy" id="btnSaveJob">💾 حفظ</button>' +
+          '<button type="button" class="btn btn-line" id="btnCancelJob">إلغاء</button>' +
+        '</div>' +
+      '</form>';
+    u.qs('#jbTitle', jobFormEl).focus();
+  }
+
+  function closeJobForm() {
+    jobFormEl.style.display = 'none';
+    jobFormEl.innerHTML = '';
+  }
+
+  async function submitJobForm(e) {
+    e.preventDefault();
+    var form = e.target;
+    var id = form.dataset.jobId ? Number(form.dataset.jobId) : null;
+    var data = {
+      title: u.qs('#jbTitle', form).value.trim(),
+      rank_id: Number(u.qs('#jbRank', form).value),
+      dept: u.qs('#jbDept', form).value.trim() || '—',
+      location: u.qs('#jbLoc', form).value.trim() || '—',
+      employment_type: u.qs('#jbType', form).value.trim() || '—',
+      salary_text: u.qs('#jbSalText', form).value.trim(),
+      salary_min: u.qs('#jbSalMin', form).value || null,
+      salary_max: u.qs('#jbSalMax', form).value || null,
+      deadline: u.qs('#jbDeadline', form).value,
+      description: u.qs('#jbDesc', form).value.trim(),
+      requirements: u.qs('#jbReq', form).value.trim(),
+      is_active: Number(u.qs('#jbActive', form).value)
+    };
+
+    var titleEl = u.qs('#jbTitle', form);
+    u.setFieldError(titleEl, '');
+    if (data.title.length < 3) { u.setFieldError(titleEl, 'العنوان مطلوب (٣ أحرف على الأقل)'); return; }
+    if (data.salary_min && data.salary_max && Number(data.salary_min) > Number(data.salary_max)) {
+      u.toast('الحد الأدنى للراتب أكبر من الأعلى', false); return;
+    }
+
+    var btn = u.qs('#btnSaveJob', form);
+    btn.disabled = true;
+    try {
+      if (id) await JobsSite.db.jobs.update(id, data);
+      else await JobsSite.db.jobs.create(data);
+      u.toast(id ? '✅ تم تعديل الوظيفة' : '✅ تمت إضافة الوظيفة');
+      closeJobForm();
+      renderJobsAdmin();
+      JobsSite.app.refreshStats();
+    } catch (err) {
+      u.toast('تعذّر الحفظ: ' + err.message, false);
+      btn.disabled = false;
+    }
+  }
+
+  async function onJobsClick(e) {
+    var btn = e.target.closest('[data-job-action]');
+    if (!btn) return;
+    var id = Number(btn.dataset.id), action = btn.dataset.jobAction;   /* data-job-action ⇒ dataset.jobAction */
+    try {
+      if (action === 'edit') { openJobForm(id); return; }
+
+      if (action === 'toggle') {
+        var job = await JobsSite.db.jobs.find(id);
+        if (!job) { u.toast('الوظيفة غير موجودة', false); return; }
+        await JobsSite.db.jobs.update(id, { is_active: job.is_active ? 0 : 1 });
+        u.toast(job.is_active ? '🔒 تم إغلاق الوظيفة' : '🔓 تم فتح الوظيفة');
+        renderJobsAdmin();
+        JobsSite.app.refreshStats();
+        return;
+      }
+
+      if (action === 'delete') {
+        var j = await JobsSite.db.jobs.find(id);
+        if (!j) { u.toast('الوظيفة غير موجودة', false); return; }
+        if (!global.confirm('حذف وظيفة «' + j.title + '»؟\nسيُحذف معها كل سجلات المتقدمين عليها.')) return;
+        await JobsSite.db.jobs.remove(id);
+        u.toast('تم حذف الوظيفة');
+        renderJobsAdmin();
+        renderRecords();
+        JobsSite.app.refreshStats();
+      }
+    } catch (err) {
+      u.toast('تعذّر تنفيذ الإجراء: ' + err.message, false);
+    }
+  }
+
   /* ─────────── الإجراءات ─────────── */
   async function onPanelClick(e) {
     var el = e.target.closest('[data-action]');
@@ -183,6 +337,8 @@
     errEl = u.qs('#gateErr');
     bodyEl = u.qs('#recBody');
     historyEl = u.qs('#historyBody');
+    jobsBodyEl = u.qs('#jobsAdminBody');
+    jobFormEl = u.qs('#jobFormBox');
     rankEl = u.qs('#recRankF');
     statusEl = u.qs('#recStatusF');
     searchEl = u.qs('#recSearch');
@@ -209,6 +365,15 @@
 
     panelEl.addEventListener('click', onPanelClick);
     panelEl.addEventListener('change', onPanelChange);
+
+    /* إدارة الوظائف */
+    jobsBodyEl.addEventListener('click', onJobsClick);
+    jobFormEl.addEventListener('submit', submitJobForm);
+    jobFormEl.addEventListener('click', function (e) {
+      if (e.target && e.target.id === 'btnCancelJob') closeJobForm();
+    });
+    u.qs('#btnAddJob').addEventListener('click', function () { openJobForm(null); });
+    u.qs('#btnReloadJobs').addEventListener('click', renderJobsAdmin);
 
     u.qs('#btnExport').addEventListener('click', exportCSV);
     u.qs('#btnResetData').addEventListener('click', resetData);

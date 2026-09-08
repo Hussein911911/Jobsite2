@@ -35,6 +35,7 @@ export JOBSITE_ADMIN_PASSWORD="كلمة-مرور-قوية"      # الافترا
 |---|---|---|
 | `GET /api/bootstrap` | عام | الرتب والحالات والإعدادات |
 | `GET /api/jobs` · `GET /api/jobs/{id}` | عام | الوظائف (`?q=&rank_id=&active=&limit=&offset=`) |
+| `POST /api/jobs` · `PATCH /api/jobs/{id}` · `DELETE /api/jobs/{id}` | مدير | إضافة/تعديل/حذف وظيفة |
 | `POST /api/applicants` | عام | تقديم جديد (تحقق + منع تكرار 409 + تقييد طلبات) |
 | `GET /api/applicants` | مدير | السجلات مربوطة بالوظيفة والحالة |
 | `PATCH /api/applicants/{id}` | مدير | تغيير الحالة + سطر في `status_history` |

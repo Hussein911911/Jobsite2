@@ -150,7 +150,48 @@ click($$('#recBody [data-action="delete"]')[0]);
 await wait(120);
 check('حذف السجل من اللوحة', db().tables.applicants.length === totalBefore - 1);
 
-/* ══════ 5) الرجوع ══════ */
+/* ══════ 5) إدارة الوظائف من اللوحة ══════ */
+const jobsBefore = db().tables.jobs.length;
+click($('#btnAddJob'));
+await wait(120);
+check('نموذج إضافة وظيفة يفتح', !!$('#jobForm'));
+$('#jbTitle').value = 'وظيفة جديدة من الاختبار';
+$('#jbRank').value = '3';
+$('#jbDept').value = 'الجودة';
+$('#jbSalMin').value = '800000';
+$('#jbSalMax').value = '1200000';
+$('#jbDeadline').value = '2030-12-31';
+$('#jbDesc').value = 'وصف تجريبي';
+fire($('#jobForm'), 'submit');
+await wait(200);
+const newJob = db().tables.jobs.find(j => j.title === 'وظيفة جديدة من الاختبار');
+check('تُضاف الوظيفة لقاعدة البيانات', !!newJob && db().tables.jobs.length === jobsBefore + 1, `${db().tables.jobs.length} وظيفة`);
+check('تُطبَّق أنواع الأعمدة (rank_id رقم، salary_min رقم)',
+  newJob && newJob.rank_id === 3 && newJob.salary_min === 800000 && newJob.is_active === 1);
+check('تظهر الوظيفة بجدول الإدارة', $$('#jobsAdminBody tr').length === jobsBefore + 1);
+
+/* رفض عنوان قصير */
+click($('#btnAddJob'));
+await wait(120);
+$('#jbTitle').value = 'ab';
+fire($('#jobForm'), 'submit');
+await wait(150);
+check('يرفض العنوان القصير', !!$('.field-error.show') && db().tables.jobs.length === jobsBefore + 1);
+click($('#btnCancelJob'));
+await wait(80);
+
+/* إغلاق/فتح */
+const toggleBtn = $$('#jobsAdminBody [data-job-action="toggle"]').find(b => Number(b.dataset.id) === newJob.id);
+click(toggleBtn);
+await wait(200);
+check('إغلاق الوظيفة يحدّث is_active', db().tables.jobs.find(j => j.id === newJob.id).is_active === 0);
+
+/* حذف */
+click($$('#jobsAdminBody [data-job-action="delete"]').find(b => Number(b.dataset.id) === newJob.id));
+await wait(200);
+check('حذف الوظيفة', !db().tables.jobs.some(j => j.id === newJob.id) && db().tables.jobs.length === jobsBefore);
+
+/* ══════ 6) الرجوع ══════ */
 window.location.hash = '#/jobs';
 await wait(120);
 check('الرجوع لقائمة الوظائف', $('#jobsGrid').style.display === 'grid' && $$('.jcard').length === 10);

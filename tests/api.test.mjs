@@ -64,8 +64,36 @@ const server = http.createServer(async (req, res) => {
       if (url.searchParams.get('q')) list = list.filter(j => j.title.includes(url.searchParams.get('q')));
       return json(res, 200, list);
     }
-    if (p === '/api/jobs/1' && method === 'GET') return json(res, 200, SERVER_DB.jobs[0]);
-    if (p === '/api/jobs/2' && method === 'GET') return json(res, 200, SERVER_DB.jobs[1]);
+    let jget = p.match(/^\/api\/jobs\/(\d+)$/);
+    if (jget && method === 'GET') {
+      const row = SERVER_DB.jobs.find(j => j.id === Number(jget[1]));
+      if (!row) return json(res, 404, { error: 'غير موجود' });
+      return json(res, 200, row);
+    }
+
+    if (p === '/api/jobs' && method === 'POST') {
+      const d = await body(req);
+      if (!d.title || String(d.title).length < 3) return json(res, 400, { error: 'العنوان مطلوب' });
+      const row = Object.assign({ id: SERVER_DB.jobs.length + 100, rank_id: 5, dept: '—', location: '—',
+        employment_type: '—', salary_text: '', salary_min: null, salary_max: null, deadline: '',
+        description: '', requirements: '', is_active: 1, created_at: '2026-09-09 12:00', updated_at: '2026-09-09 12:00' }, d);
+      SERVER_DB.jobs.push(row);
+      return json(res, 201, row);
+    }
+    let jm = p.match(/^\/api\/jobs\/(\d+)$/);
+    if (jm && method === 'PATCH') {
+      const d = await body(req);
+      const row = SERVER_DB.jobs.find(j => j.id === Number(jm[1]));
+      if (!row) return json(res, 404, { error: 'غير موجود' });
+      Object.assign(row, d);
+      return json(res, 200, row);
+    }
+    if (jm && method === 'DELETE') {
+      const i = SERVER_DB.jobs.findIndex(j => j.id === Number(jm[1]));
+      if (i < 0) return json(res, 404, { error: 'غير موجود' });
+      SERVER_DB.jobs.splice(i, 1);
+      return json(res, 204, {});
+    }
 
     if (p === '/api/applicants' && method === 'GET') {
       return json(res, 200, SERVER_DB.applicants.map(a => Object.assign({}, a, {
@@ -196,6 +224,22 @@ check('يعرض سجل التغييرات من /api/history', $$('#historyBody t
 const sel = $$('#recBody [data-action="status"]')[0];
 if (sel) { sel.value = '4'; fire(sel, 'change'); await wait(250); }
 check('تغيير الحالة يرسل PATCH', calls.some(c => /^PATCH \/api\/applicants\/\d+$/.test(c)) && SERVER_DB.applicants[0].status_id === 4);
+
+/* ══════ 4) إدارة الوظائف من اللوحة ══════ */
+click($('#btnAddJob'));
+await wait(150);
+check('تفتح نموذج إضافة وظيفة', !!$('#jobForm'));
+$('#jbTitle').value = 'وظيفة مضافة من اللوحة';
+$('#jbDept').value = 'تقنية المعلومات';
+fire($('#jobForm'), 'submit');
+await wait(250);
+check('تُضاف الوظيفة عبر POST /api/jobs', calls.includes('POST /api/jobs') &&
+  SERVER_DB.jobs.some(j => j.title === 'وظيفة مضافة من اللوحة'), `${SERVER_DB.jobs.length} وظائف`);
+check('تظهر الوظيفة الجديدة بجدول الإدارة', $$('#jobsAdminBody tr').length === 3, `${$$('#jobsAdminBody tr').length} صف`);
+
+click($$('#jobsAdminBody [data-job-action="toggle"]')[0]);
+await wait(250);
+check('إغلاق/فتح الوظيفة يرسل PATCH', calls.some(c => /^PATCH \/api\/jobs\/\d+$/.test(c)));
 
 server.close();
 window.close();

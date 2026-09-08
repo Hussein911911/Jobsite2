@@ -207,6 +207,69 @@ def list_jobs(
         return [dict(r) for r in con.execute(sql, args)]
 
 
+def validate_job(data: dict, partial: bool = False) -> dict:
+    """يتحقق من حقول الوظيفة (partial=True للتعديل الجزئي)."""
+    out: dict = {}
+    title = data.get("title")
+    if title is not None or not partial:
+        title = (title or "").strip()
+        if len(title) < 3:
+            raise HTTPException(400, "عنوان الوظيفة مطلوب (٣ أحرف على الأقل)")
+        out["title"] = title
+
+    if "rank_id" in data or not partial:
+        rank_id = int(data.get("rank_id") or 0)
+        with closing(connect()) as con:
+            if not con.execute("SELECT 1 FROM ranks WHERE id = ?", (rank_id,)).fetchone():
+                raise HTTPException(400, "الرتبة غير صحيحة")
+        out["rank_id"] = rank_id
+
+    for field, maxlen in (("dept", 100), ("location", 100), ("employment_type", 50),
+                          ("salary_text", 100), ("description", 4000), ("requirements", 4000)):
+        if field in data or not partial:
+            out[field] = (str(data.get(field) or ("—" if field in ("dept", "location", "employment_type") else "")))[:maxlen]
+
+    for field in ("salary_min", "salary_max"):
+        if field in data or not partial:
+            v = data.get(field)
+            out[field] = int(v) if v not in (None, "", 0) else None
+
+    if out.get("salary_min") and out.get("salary_max") and out["salary_min"] > out["salary_max"]:
+        raise HTTPException(400, "الحد الأدنى للراتب أكبر من الأعلى")
+
+    if "deadline" in data or not partial:
+        dl = (str(data.get("deadline") or "")).strip()
+        if dl:
+            try:
+                datetime.strptime(dl, "%Y-%m-%d")
+            except ValueError:
+                raise HTTPException(400, "تاريخ آخر موعد غير صحيح (YYYY-MM-DD)")
+        out["deadline"] = dl
+
+    if "is_active" in data or not partial:
+        out["is_active"] = 1 if data.get("is_active") in (1, True, "1", "true") else 0
+    return out
+
+
+@app.post("/api/jobs", status_code=201)
+def create_job(request: Request, data: dict):
+    """إضافة وظيفة (مدير فقط)."""
+    require_admin(request)
+    d = validate_job(data)
+    with closing(connect()) as con:
+        cur = con.execute(
+            "INSERT INTO jobs (rank_id, title, dept, location, employment_type, salary_text,"
+            " salary_min, salary_max, deadline, description, requirements, is_active, created_at, updated_at)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (d["rank_id"], d["title"], d["dept"], d["location"], d["employment_type"],
+             d["salary_text"], d.get("salary_min"), d.get("salary_max"), d["deadline"],
+             d["description"], d["requirements"], d["is_active"], now(), now()),
+        )
+        con.commit()
+        row = con.execute("SELECT * FROM jobs WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
 @app.get("/api/jobs/{job_id}")
 def get_job(job_id: int):
     with closing(connect()) as con:
@@ -214,6 +277,35 @@ def get_job(job_id: int):
     if not row:
         raise HTTPException(404, "الوظيفة غير موجودة")
     return dict(row)
+
+
+@app.patch("/api/jobs/{job_id}")
+def update_job(request: Request, job_id: int, data: dict):
+    """تعديل وظيفة (مدير فقط) — يقبل حقول جزئية."""
+    require_admin(request)
+    d = validate_job(data, partial=True)
+    if not d:
+        raise HTTPException(400, "لا توجد حقول للتعديل")
+    with closing(connect()) as con:
+        if not con.execute("SELECT 1 FROM jobs WHERE id = ?", (job_id,)).fetchone():
+            raise HTTPException(404, "الوظيفة غير موجودة")
+        sets = ", ".join(f"{k} = ?" for k in d)
+        con.execute(f"UPDATE jobs SET {sets}, updated_at = ? WHERE id = ?", (*d.values(), now(), job_id))
+        con.commit()
+        row = con.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+    return dict(row)
+
+
+@app.delete("/api/jobs/{job_id}", status_code=204)
+def delete_job(request: Request, job_id: int):
+    """حذف وظيفة (مدير فقط) — يمسح سجلاتها تلقائياً عبر ON DELETE CASCADE."""
+    require_admin(request)
+    with closing(connect()) as con:
+        res = con.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+        con.commit()
+    if res.rowcount == 0:
+        raise HTTPException(404, "الوظيفة غير موجودة")
+    return Response(status_code=204)
 
 
 # ═══════════════ 3) المتقدمون ═══════════════

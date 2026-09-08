@@ -1,8 +1,9 @@
 /* ============================================================
    tests/e2e.test.mjs — اختبار نهاية-بنهاية ضد سيرفر بايثون حقيقي
    يفترض السيرفر شغال على PORT (افتراضي 8010):
-     cd server && uvicorn app:app --port 8010
-   التشغيل: npm run test:e2e
+     JOBSITE_ADMIN_PASSWORD='...' uvicorn --app-dir server app:app --port 8010
+   التشغيل: JOBSITE_ADMIN_PASSWORD='...' npm run test:e2e
+   (إن لم تُمرّر المتغير يستخدم admin123 الافتراضي)
    ============================================================ */
 import { JSDOM, VirtualConsole } from 'jsdom';
 
@@ -68,8 +69,28 @@ await wait(400);
 check('تغيير الحالة ينفّذ PATCH على السيرفر', true, `السجل #${applicantId} → مقبول`);
 check('الإحصاءات تتحدث بعد التغيير', Number($('#rsOk').textContent) >= 1, 'مقبول=' + $('#rsOk').textContent);
 
+/* 5) إدارة الوظائف: إضافة → تظهر للزوار → حذف */
+click($('#btnAddJob'));
+await wait(200);
+$('#jbTitle').value = 'وظيفة E2E مؤقتة';
+$('#jbRank').value = '4';
+$('#jbDept').value = 'اختبار';
+$('#jbDeadline').value = '2030-06-30';
+fire($('#jobForm'), 'submit');
+await wait(400);
+check('تُضاف الوظيفة من اللوحة إلى SQLite', $$('#jobsAdminBody tr').length === 11, `${$$('#jobsAdminBody tr').length} صف`);
+
+const pub = await (await fetch(new URL('/api/jobs?limit=0', BASE))).json();
+check('تظهر الوظيفة الجديدة للزوار فوراً', pub.some(j => j.title === 'وظيفة E2E مؤقتة'));
+
+window.confirm = () => true;
+const newRow = [...$$('#jobsAdminBody tr')].find(tr => tr.textContent.includes('وظيفة E2E مؤقتة'));
+click(newRow.querySelector('[data-job-action="delete"]'));
+await wait(400);
+const pub2 = await (await fetch(new URL('/api/jobs?limit=0', BASE))).json();
+check('حذف الوظيفة يزيلها من الموقع', !pub2.some(j => j.title === 'وظيفة E2E مؤقتة'), `${pub2.length} وظيفة`);
+
 window.close();
-console.log(results.join('\n'));
 const failed = results.filter(r => r.startsWith('❌'));
 console.log(`\nالنتيجة: ${results.length - failed.length}/${results.length} ناجح (ضد ${BASE})`);
 if (errors.length) console.log('أخطاء JS:\n' + errors.join('\n'));
