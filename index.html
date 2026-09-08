@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شركة الرافدين — موقع الوظائف (الرتب والسجلات)</title>
+<style>
+  :root{
+    --navy:#123c5c; --navy2:#0e2f4a; --navy3:#0a2236;
+    --gold:#c9962e; --gold-dark:#a97a1e; --goldbg:#fbf3e0;
+    --green:#0e7a5f; --greenbg:#e4f4ee; --red:#b3443c; --redbg:#fbeceb;
+    --blue:#2563a8; --bluebg:#e8f0f9; --purple:#6b4fa0; --purplebg:#efe9f8;
+    --gray:#64748b; --graybg:#eef1f5;
+    --bg:#f4f7fa; --card:#fff; --line:#dfe7ee; --text:#22303c; --muted:#64748b;
+    --shadow:0 2px 12px rgba(14,47,74,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+  body{background:var(--bg);color:var(--text);line-height:1.85;font-size:14.5px}
+  a{text-decoration:none;color:inherit}
+  .container{max-width:1100px;margin:0 auto;padding:0 18px}
+
+  /* ===== الشريط العلوي ===== */
+  .pnav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:80;box-shadow:var(--shadow)}
+  .pnav .in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:10px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16.5px;color:var(--navy);cursor:pointer}
+  .brand .ico{width:38px;height:38px;background:var(--navy);color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .brand small{display:block;font-size:10.5px;color:var(--muted);font-weight:400}
+  .pnav nav{display:flex;gap:8px}
+  .navbtn{border:none;background:none;padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--muted);font-family:inherit;transition:.15s}
+  .navbtn:hover{background:var(--graybg);color:var(--navy)}
+  .navbtn.on{background:var(--navy);color:#fff}
+  .navbtn.gold{background:var(--gold);color:#fff}
+  .navbtn.gold:hover{background:var(--gold-dark)}
+
+  /* ===== الهيرو ===== */
+  .hero{background:linear-gradient(135deg,var(--navy3),var(--navy) 55%,#1b5683);color:#fff;padding:52px 0 46px}
+  .hero h1{font-size:27px;margin-bottom:8px}
+  .hero p{opacity:.93;font-size:15px;max-width:640px}
+  .hero .stats{display:flex;gap:26px;margin-top:20px;flex-wrap:wrap}
+  .hero .st{text-align:center}
+  .hero .st b{font-size:22px;display:block;color:#ffd98a}
+  .hero .st span{font-size:12px;opacity:.85}
+
+  /* ===== الفلاتر ===== */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 20px}
+  .filters input,.filters select{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--text)}
+  .filters input{flex:1;min-width:230px}
+  .filters select{min-width:180px}
+  .filters input:focus,.filters select:focus{outline:none;border-color:var(--navy)}
+
+  /* ===== بطاقات الوظائف ===== */
+  .job-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(295px,1fr));gap:16px;margin-bottom:36px}
+  .jcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;transition:.2s;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);position:relative}
+  .jcard:hover{transform:translateY(-4px);border-color:var(--navy)}
+  .jcard .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .jcard h3{font-size:16px}
+  .jcard .meta{display:flex;flex-wrap:wrap;gap:7px;font-size:11.5px;color:var(--muted)}
+  .jcard .meta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:2px 10px}
+  .jcard .salary{font-weight:800;color:var(--navy);font-size:13px}
+  .jcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:9px;border-top:1px dashed var(--line)}
+  .emptystate{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:34px;text-align:center;color:var(--muted);grid-column:1/-1}
+
+  /* ===== شارات الرتب ===== */
+  .rbadge{font-size:10.5px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap;border:1px solid transparent}
+  .r1{background:var(--goldbg);color:var(--gold-dark);border-color:#e7c98a}
+  .r2{background:var(--bluebg);color:var(--blue);border-color:#bcd6f0}
+  .r3{background:var(--greenbg);color:var(--green);border-color:#b5e0d2}
+  .r4{background:var(--purplebg);color:var(--purple);border-color:#d5c8ec}
+  .r5{background:var(--graybg);color:var(--gray);border-color:#d7dde4}
+
+  /* ===== أزرار ===== */
+  .btn{display:inline-block;padding:10px 20px;border-radius:9px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;transition:.15s}
+  .btn-navy{background:var(--navy);color:#fff}
+  .btn-navy:hover{background:var(--navy2)}
+  .btn-gold{background:var(--gold);color:#fff}
+  .btn-gold:hover{background:var(--gold-dark)}
+  .btn-sm{padding:6px 13px;font-size:11.5px;border-radius:7px}
+  .btn-line{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+  .btn-line:hover{border-color:var(--navy);color:var(--navy)}
+  .btn-danger{background:var(--redbg);color:var(--red);border:1px solid #eec9c5}
+  .btn-danger:hover{background:var(--red);color:#fff}
+  .btn-green{background:var(--green);color:#fff}
+  .btn-green:hover{background:#0b6450}
+
+  /* ===== تفاصيل الوظيفة + نموذج التسجيل ===== */
+  .detail{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:16px 0 36px;box-shadow:var(--shadow)}
+  .detail h1{font-size:21px;margin-bottom:8px;color:var(--navy)}
+  .dmeta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
+  .dmeta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 13px;font-size:12px;font-weight:700;color:var(--navy2)}
+  .detail h4{color:var(--navy);margin:13px 0 5px;font-size:14.5px}
+  .detail p{font-size:13.5px}
+  .apply{background:#fff;border:1.5px solid var(--navy);border-radius:14px;padding:20px 22px;margin-top:18px}
+  .apply h3{font-size:16px;margin-bottom:12px;color:var(--navy)}
+  .apply label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:9px 0 4px}
+  .apply input,.apply textarea{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-family:inherit;font-size:13.5px}
+  .apply input:focus,.apply textarea:focus{outline:none;border-color:var(--gold)}
+
+  /* ===== بوابة السجلات ===== */
+  .gate{min-height:50vh;display:flex;align-items:center;justify-content:center}
+  .gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:min(380px,92vw);box-shadow:var(--shadow);text-align:center}
+  .gatecard .ico{font-size:40px}
+  .gatecard h3{font-size:17px;margin:6px 0 2px}
+  .gatecard p{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .gatecard input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;text-align:center;letter-spacing:4px}
+  .gatecard input:focus{outline:none;border-color:var(--navy)}
+  .gate-err{display:none;background:var(--redbg);color:var(--red);border-radius:8px;padding:8px;font-size:12.5px;margin-top:10px}
+  .gate-hint{background:var(--goldbg);border-radius:9px;padding:8px;font-size:12px;color:var(--gold-dark);margin-top:13px;line-height:1.8}
+
+  /* ===== لوحة السجلات ===== */
+  .recstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+  .rcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+  .rcard .lb{font-size:11.5px;color:var(--muted)}
+  .rcard .vl{font-size:24px;font-weight:800;color:var(--navy);margin:3px 0}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .panel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+  .panel h3{font-size:14.5px}
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.8px}
+  th{text-align:right;background:var(--navy);color:#fff;padding:9px 11px;font-size:11.8px;white-space:nowrap}
+  td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:middle}
+  tr:hover td{background:#f6f9fc}
+  .status{font-size:11px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap}
+  .s-new{background:var(--bluebg);color:var(--blue)}
+  .s-rev{background:var(--goldbg);color:var(--gold-dark)}
+  .s-int{background:var(--purplebg);color:var(--purple)}
+  .s-ok{background:var(--greenbg);color:var(--green)}
+  .s-no{background:var(--redbg);color:var(--red)}
+  .sels{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .sels select{padding:6px 8px;font-size:11.5px;border:1.5px solid var(--line);border-radius:7px;font-family:inherit}
+  .muted{color:var(--muted);font-size:12px}
+  .rankmini{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px}
+
+  /* ===== الرسائل ===== */
+  .toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:var(--navy);color:#fff;padding:12px 24px;border-radius:11px;font-size:13.5px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.35s;z-index:200;pointer-events:none;text-align:center}
+  .toast.show{opacity:1}
+  .toast.bad{background:var(--red)}
+
+  /* ===== الفوتر ===== */
+  .pfoot{background:var(--navy2);color:#c6d9ea;padding:32px 0 18px;margin-top:26px}
+  .pfoot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;margin-bottom:18px}
+  .pfoot h4{color:#fff;margin-bottom:9px;font-size:14.5px}
+  .pfoot p,.pfoot a{font-size:12.5px;color:#c6d9ea;display:block;padding:2px 0}
+  .pfoot a:hover{color:#ffd98a}
+  .pfoot .bot{border-top:1px solid rgba(255,255,255,.14);padding-top:14px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.6)}
+
+  @media(max-width:760px){
+    .pnav nav{flex-wrap:wrap;justify-content:flex-end}
+    .hero h1{font-size:23px}
+    .pnav .in{height:auto;padding:10px 0;flex-direction:column;gap:6px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ الشريط العلوي ══════════════ -->
+<div class="pnav">
+  <div class="container in">
+    <a class="brand" onclick="go('jobs')">
+      <span class="ico">🏢</span>
+      <span>شركة الرافدين<small>للاستثمار والخدمات</small></span>
+    </a>
+    <nav>
+      <button id="navJobs" class="navbtn on" onclick="go('jobs')">📋 الوظائف</button>
+      <button id="navRec" class="navbtn" onclick="go('records')">🗂️ السجلات</button>
+      <button class="navbtn gold" onclick="go('jobs');setTimeout(showTop,300)">➕ سجّل الآن</button>
+    </nav>
+  </div>
+</div>
+
+<!-- ══════════════ الهيرو ══════════════ -->
+<div class="hero">
+  <div class="container">
+    <h1>انضم إلى فريق شركة الرافدين 👋</h1>
+    <p>نظام الرتب الوظيفي: كل وظيفة لها رتبة محددة — من الإدارة العليا إلى المبتدئين — وسجلات التقديم تُدوّن وتُتابع بمراحلها.</p>
+    <div class="stats">
+      <div class="st"><b id="stJobs">0</b><span>وظيفة شاغرة</span></div>
+      <div class="st"><b id="stR1">0</b><span>رتبة أولى (إدارة)</span></div>
+      <div class="st"><b id="stRecs">0</b><span>سجل تقديم</span></div>
+      <div class="st"><b id="stNew">0</b><span>سجلات جديدة</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ عرض الوظائف ══════════════ -->
+<div id="viewJobs">
+  <div class="container">
+    <div class="filters">
+      <input id="searchQ" placeholder="🔍 ابحث: وظيفة، قسم، مكان..." oninput="renderJobs()">
+      <select id="rankF" onchange="renderJobs()">
+        <option value="">كل الرتب</option>
+        <option value="1">⭐ الرتبة الأولى — إدارة عليا</option>
+        <option value="2">⭐⭐ الرتبة الثانية — إدارة وسطى</option>
+        <option value="3">⭐⭐⭐ الرتبة الثالثة — إشراف</option>
+        <option value="4">⭐⭐⭐⭐ الرتبة الرابعة — تنفيذي</option>
+        <option value="5">⭐⭐⭐⭐⭐ الرتبة الخامسة — مبتدئ</option>
+      </select>
+      <button class="btn btn-navy btn-sm" onclick="showTop()">⬆ للوظيفة الأعلى رتبة</button>
+    </div>
+    <div id="jobsGrid" class="job-grid"></div>
+    <div id="jobDetailBox" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ══════════════ السجلات (بوابة PIN) ══════════════ -->
+<div id="viewRecords" style="display:none">
+  <div class="container">
+    <div id="gateBox">
+      <div class="gate">
+        <div class="gatecard">
+          <div class="ico">🔐</div>
+          <h3>منطقة السجلات</h3>
+          <p>هذه المنطقة خاصة بإدارة الشركة — أدخل رمز الدخول</p>
+          <input id="pinInput" type="password" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')tryGate()">
+          <button class="btn btn-navy" style="width:100%;margin-top:12px" onclick="tryGate()">دخول</button>
+          <div class="gate-err" id="gateErr">الرمز غير صحيح — حاول مرة أخرى</div>
+          <div class="gate-hint">🔑 <b>رمز تجريبي:</b> 1234
+(في النسخة الحقيقية يُدار عبر لوحة إدارة محمية بكلمة مرور)</div>
+          <p style="margin-top:12px"><a href="#" style="color:var(--navy);font-size:12.5px;font-weight:700;cursor:pointer" onclick="go('jobs');return false">← رجوع للوظائف</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="recordsBox" style="display:none">
+      <div class="recstats">
+        <div class="rcard"><div class="lb">🗂️ كل السجلات</div><div class="vl" id="rsTotal">0</div></div>
+        <div class="rcard"><div class="lb">🆕 جديد</div><div class="vl" style="color:var(--blue)" id="rsNew">0</div></div>
+        <div class="rcard"><div class="lb">✅ مقبول</div><div class="vl" style="color:var(--green)" id="rsOk">0</div></div>
+        <div class="rcard"><div class="lb">❌ مرفوض</div><div class="vl" style="color:var(--red)" id="rsNo">0</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="hd">
+          <h3>📋 سجلات المتقدمين</h3>
+          <div class="sels">
+            <select id="recRankF" onchange="renderRecords()">
+              <option value="">كل الرتب</option>
+              <option value="1">الرتبة الأولى</option><option value="2">الرتبة الثانية</option>
+              <option value="3">الرتبة الثالثة</option><option value="4">الرتبة الرابعة</option>
+              <option value="5">الرتبة الخامسة</option>
+            </select>
+            <select id="recStatusF" onchange="renderRecords()">
+              <option value="">كل الحالات</option>
+              <option>جديد</option><option>قيد المراجعة</option><option>تمت المقابلة</option><option>مقبول</option><option>مرفوض</option>
+            </select>
+            <input id="recSearch" placeholder="بحث بالاسم/الهاتف..." style="padding:7px 11px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:12.5px" oninput="renderRecords()">
+            <button class="btn btn-gold btn-sm" onclick="exportRecs()">📤 تصدير CSV</button>
+          </div>
+        </div>
+        <div class="tblwrap">
+          <table>
+            <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الوظيفة</th><th>الرتبة</th><th>التاريخ</th><th>الحالة</th><th>إجراء</th></tr></thead>
+            <tbody id="recBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ الفوتر ══════════════ -->
+<div class="pfoot">
+  <div class="container">
+    <div class="cols">
+      <div><h4>🏢 شركة الرافدين</h4><p>منذ 2010 نعمل في الاستثمار والخدمات العامة — فريقنا هو أساس نجاحنا، ونظام الرتب يضمن مساراً واضحاً لكل موظف.</p></div>
+      <div><h4>روابط</h4><a onclick="go('jobs')">الوظائف الشاغرة</a><a onclick="go('records')">سجلات التقديم</a></div>
+      <div><h4>التواصل</h4><a>📞 0780 123 4567</a><a>✉️ hr@al-rafidain.com</a><a>📍 بغداد — المنصور، شارع 14 رمضان</a></div>
+    </div>
+    <div class="bot">© 2026 شركة الرافدين — جميع الحقوق محفوظة</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   شركة الرافدين — نظام الوظائف (الرتب والسجلات)
+   البيانات تظهر عبر أمثلة توضيحية تلقائية + إضافات
+   ═══════════════════════════════════════════════ */
+
+/* ---- الرتب (الأسماء والألوان) ---- */
+const RANKS = {
+  1:{name:"الرتبة الأولى — إدارة عليا", short:"إدارة عليا", icon:"⭐⭐"},
+  2:{name:"الرتبة الثانية — إدارة وسطى", short:"إدارة وسطى", icon:"⭐⭐⭐"},
+  3:{name:"الرتبة الثالثة — إشراف", short:"إشراف", icon:"⭐⭐⭐⭐"},
+  4:{name:"الرتبة الرابعة — تنفيذي", short:"تنفيذي", icon:"⭐⭐⭐⭐⭐"},
+  5:{name:"الرتبة الخامسة — مبتدئ", short:"مبتدئ", icon:"⭐"}
+};
+const RCLASS = {1:"r1",2:"r2",3:"r3",4:"r4",5:"r5"};
+const RCOLOR = {1:"#a97a1e",2:"#2563a8",3:"#0e7a5f",4:"#6b4fa0",5:"#64748b"};
+
+/* ---- الوظائف الشاغرة ---- */
+const JOBS = [
+  {id:1, title:"مدير عام", dept:"الإدارة العليا", place:"بغداد — المنصور", salary:"4,500,000 د.ع", rank:1, 
+   desc:"قيادة الشركة ووضع الاستراتيجية العامة والإشراف على جميع الأقسام.", req:"خبرة 15+ سنة، شهادة ماجستير بإدارة الأعمال، مهارات قيادية عالية."},
+  {id:2, title:"مدير الموارد البشرية", dept:"الموارد البشرية", place:"بغداد — المنصور", salary:"3,200,000 د.ع", rank:1,
+   desc:"إدارة دورة عمل الموظفين من التوظيف إلى التقييم والتطوير.", req:"خبرة 10+ سنوات، تخصص إدارة أعمال أو قانون، مهارات تواصل ممتازة."},
+  {id:3, title:"محاسب أول", dept:"المالية", place:"بغداد — المنصور", salary:"2,300,000 د.ع", rank:2,
+   desc:"متابعة الحسابات والقيود المالية وإعداد التقارير الدورية.", req:"خبرة 6+ سنوات، بكالوريوس محاسبة، إجادة Excel وبرامج محاسبية."},
+  {id:4, title:"مشرف صيانة", dept:"الخدمات", place:"بغداد — الكرادة", salary:"1,800,000 د.ع", rank:3,
+   desc:"الإشراف على فرق الصيانة ومتابعة جودة التنفيذ والسلامة.", req:"خبرة 4+ سنوات، دبلوم فني، قدرة على إدارة الفرق."},
+  {id:5, title:"مسؤول استثمار", dept:"الاستثمار", place:"بغداد — المنصور", salary:"2,600,000 د.ع", rank:2,
+   desc:"دراسة الفرص الاستثمارية وإعداد دراسات الجدوى والمفاوضات.", req:"خبرة 5+ سنوات، تخصص مالية أو اقتصاد، مهارات تحليلية."},
+  {id:6, title:"منسق اداري", dept:"الإدارة", place:"بغداد — الكرادة", salary:"1,300,000 د.ع", rank:4,
+   desc:"تنسيق الأعمال الإدارية والمستندات والمراسلات اليومية.", req:"بكالوريوس، مهارات مكتبية وإجادة الحاسوب، خبرة 2+ سنوات."},
+  {id:7, title:"موظف خدمة عملاء", dept:"خدمة العملاء", place:"بغداد — المنصور", salary:"1,100,000 د.ع", rank:5,
+   desc:"استقبال الاتصالات وخدمة العملاء وحل استفساراتهم.", req:"مهارات تواصل، حاسوب، خبرة سنة أو خريج جديد."},
+  {id:8, title:"سائق", dept:"النقل", place:"بغداد", salary:"950,000 د.ع", rank:5,
+   desc:"القيادة ونقل الموظفين والمعدات ضمن أوقات العمل.", req:"رخصة قيادة سارية، معرفة بشوارع بغداد."}
+];
+
+/* ---- إعداد سجلات المثال (تلقائية لتوضيح اللوحة) ---- */
+const sampleSeed = [
+  {name:"أحمد كريم", phone:"0770 111 2233", jobId:1, rank:1, status:"قيد المراجعة", date:"2026-08-14"},
+  {name:"سارة جاسم", phone:"0781 222 3344", jobId:3, rank:2, status:"جديد", date:"2026-08-22"},
+  {name:"علي حسين", phone:"0790 333 4455", jobId:4, rank:3, status:"تمت المقابلة", date:"2026-08-25"},
+  {name:"مريم عادل", phone:"0771 444 5566", jobId:2, rank:1, status:"مقبول", date:"2026-08-02"},
+  {name:"يوسف سعد", phone:"0782 555 6677", jobId:7, rank:5, status:"جديد", date:"2026-09-01"},
+  {name:"نور محمود", phone:"0791 666 7788", jobId:6, rank:4, status:"مرفوض", date:"2026-07-30"}
+];
+
+let records = [];
+const LS_KEY = "rafidain_records_v1";
+
+/* ---- تحميل وتخزين السجلات ---- */
+function loadRecords(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ records = JSON.parse(raw); return; }
+  }catch(e){}
+  records = sampleSeed.map(s=>({...s, id:Date.now()+Math.random()}));
+  saveRecords();
+}
+function saveRecords(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(records)); }catch(e){}
+}
+function nextId(){ return Date.now()+Math.floor(Math.random()*1000); }
+
+/* ---- التنقل بين الصفحات ---- */
+function go(view){
+  const jobsEl = document.getElementById('viewJobs');
+  const recEl  = document.getElementById('viewRecords');
+  const nj = document.getElementById('navJobs');
+  const nr = document.getElementById('navRec');
+  if(view==='jobs'){
+    jobsEl.style.display=''; recEl.style.display='none';
+    nj.classList.add('on'); nr.classList.remove('on');
+    renderJobs();
+  }else{
+    jobsEl.style.display='none'; recEl.style.display='';
+    nr.classList.add('on'); nj.classList.remove('on');
+    if(!localStorage.getItem('rafidain_gate')){
+      document.getElementById('gateBox').style.display='';
+      document.getElementById('recordsBox').style.display='none';
+      setTimeout(()=>document.getElementById('pinInput').focus(),50);
+    }else{
+      document.getElementById('gateBox').style.display='none';
+      document.getElementById('recordsBox').style.display='';
+      renderRecords();
+    }
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---- بوابة الدخول ---- */
+const PIN = "1234";
+function tryGate(){
+  const val = document.getElementById('pinInput').value.trim();
+  if(val===PIN){
+    localStorage.setItem('rafidain_gate','1');
+    document.getElementById('gateBox').style.display='none';
+    document.getElementById('recordsBox').style.display='';
+    document.getElementById('gateErr').style.display='none';
+    toast('✅ تم الدخول بنجاح');
+    renderRecords();
+  }else{
+    document.getElementById('gateErr').style.display='block';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinInput').focus();
+  }
+}
+
+/* ---- رندر الوظائف ---- */
+function renderJobs(){
+  const q = (document.getElementById('searchQ').value||'').trim().toLowerCase();
+  const rf = document.getElementById('rankF').value;
+  const grid = document.getElementById('jobsGrid');
+  let list = JOBS.slice();
+  if(rf){ list = list.filter(j=>j.rank===parseInt(rf)); }
+  if(q){ list = list.filter(j=> (j.title+j.dept+j.place).toLowerCase().includes(q)); }
+  if(!list.length){
+    grid.innerHTML = '<div class="emptystate">🔎 لا توجد وظائف مطابقة لبحثك</div>';
+  }else{
+    grid.innerHTML = list.map(j=>{
+      const fallback = RANKS[j.rank].icon;
+      return `<div class="jcard">
+        <div class="top">
+          <h3>${j.title}</h3>
+          <span class="rbadge ${RCLASS[j.rank]}">${RANKS[j.rank].short}</span>
+        </div>
+        <div class="meta">
+          <span>🏢 ${j.dept}</span><span>📍 ${j.place}</span><span>${fallback}</span>
+        </div>
+        <div class="salary">💵 ${j.salary}</div>
+        <div class="foot">
+          <span class="muted">${RANKS[j.rank].name}</span>
+          <button class="btn btn-navy btn-sm" onclick="showDetail(${j.id})">التفاصيل</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateHeroStats();
+}
+
+/* ---- عرض تفاصيل وظيفة + نموذج التسجيل ---- */
+function showDetail(id){
+  const j = JOBS.find(x=>x.id===id);
+  if(!j) return;
+  document.getElementById('jobDetailBox').style.display='block';
+  document.getElementById('jobsGrid').style.display='none';
+  document.getElementById('jobDetailBox').innerHTML = `
+    <div class="detail">
+      <h1>${j.title}</h1>
+      <div class="dmeta">
+        <span>${RANKS[j.rank].name}</span><span>🏢 ${j.dept}</span><span>📍 ${j.place}</span><span>💵 ${j.salary}</span>
+      </div>
+      <h4>📌 عن الوظيفة</h4><p>${j.desc}</p>
+      <h4>🎓 المتطلبات</h4><p>${j.req}</p>
+      <div class="apply">
+        <h3>✍️ قدّم على هذه الوظيفة</h3>
+        <label>الاسم الكامل</label>
+        <input id="apName" placeholder="أدخل اسمك الثلاثي">
+        <label>رقم الهاتف</label>
+        <input id="apPhone" placeholder="07xx xxx xxxx">
+        <label>ملاحظة</label>
+        <textarea id="apNote" rows="3" placeholder="أي معلومات إضافية (اختياري)"></textarea>
+        <button class="btn btn-gold" style="margin-top:14px;width:100%" onclick="submitApply(${id})">إرسال الطلب</button>
+      </div>
+      <button class="btn btn-line btn-sm" style="margin-top:12px" onclick="backToList()">← رجوع للقائمة</button>
+    </div>`;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function backToList(){
+  document.getElementById('jobDetailBox').style.display='none';
+  document.getElementById('jobDetailBox').innerHTML='';
+  document.getElementById('jobsGrid').style.display='';
+  renderJobs();
+}
+
+/* ---- إرسال طلب التقديم ---- */
+function submitApply(jobId){
+  const name = document.getElementById('apName').value.trim();
+  const phone = document.getElementById('apPhone').value.trim();
+  if(!name || !phone){ toast('⚠️ أدخل الاسم ورقم الهاتف', true); return; }
+  const j = JOBS.find(x=>x.id===jobId);
+  records.unshift({
+    id: nextId(),
+    name: name,
+    phone: phone,
+    jobId: jobId,
+    jobTitle: j.title,
+    rank: j.rank,
+    status: "جديد",
+    date: new Date().toISOString().slice(0,10)
+  });
+  saveRecords();
+  toast('✅ تم حفظ طلبك بنجاح');
+  backToList();
+}
+
+/* ---- زر: للوظيفة الأعلى رتبة ---- */
+function showTop(){
+  const top = JOBS.slice().sort((a,b)=>a.rank-b.rank)[0];
+  if(top){ showDetail(top.id); }
+}
+
+/* ---- رندر السجلات ---- */
+function renderRecords(){
+  const rf = document.getElementById('recRankF').value;
+  const sf = document.getElementById('recStatusF').value;
+  const sq = (document.getElementById('recSearch').value||'').trim().toLowerCase();
+  let list = records.slice();
+  if(rf){ list = list.filter(r=>r.rank===parseInt(rf)); }
+  if(sf){ list = list.filter(r=>r.status===sf); }
+  if(sq){ list = list.filter(r=>(r.name+r.phone+(r.jobTitle||'')).toLowerCase().includes(sq)); }
+  const body = document.getElementById('recBody');
+  if(!list.length){
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">لا توجد سجلات</td></tr>`;
+  }else{
+    body.innerHTML = list.map((r,i)=>{
+      const rlabel = r.rank? (RANKS[r.rank]?RANKS[r.rank].short:'') : '';
+      const rcls = r.rank? (RCLASS[r.rank]||'r5') : 'r5';
+      return `<tr>
+        <td>${i+1}</td>
+        <td>${r.name}</td>
+        <td>${r.phone}</td>
+        <td>${r.jobTitle||''}</td>
+        <td><span class="rankmini ${rcls}">${rlabel}</span></td>
+        <td>${r.date||''}</td>
+        <td><span class="status ${statusClass(r.status)}">${r.status}</span></td>
+        <td>
+          <select onchange="updateStatus(${r['id']}, this.value)" style="padding:5px 7px;border:1.5px solid var(--line);border-radius:7px;font-family:inherit;font-size:11.5px">
+            <option ${r.status==='جديد'?'selected':''}>جديد</option>
+            <option ${r.status==='قيد المراجعة'?'selected':''}>قيد المراجعة</option>
+            <option ${r.status==='تمت المقابلة'?'selected':''}>تمت المقابلة</option>
+            <option ${r.status==='مقبول'?'selected':''}>مقبول</option>
+            <option ${r.status==='مرفوض'?'selected':''}>مرفوض</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  updateRecStats();
+}
+
+function statusClass(s){
+  switch(s){
+    case 'جديد': return 's-new';
+    case 'قيد المراجعة': return 's-rev';
+    case 'تمت المقابلة': return 's-int';
+    case 'مقبول': return 's-ok';
+    case 'مرفوض': return 's-no';
+    default: return 's-new';
+  }
+}
+
+/* ---- تحديث حالة سجل ---- */
+function updateStatus(id, status){
+  const r = records.find(x=>x.id===id);
+  if(r){ r.status = status; saveRecords(); renderRecords(); toast('تم تحديث الحالة'); }
+}
+
+/* ---- إحصاءات الهيرو ---- */
+function updateHeroStats(){
+  document.getElementById('stJobs').textContent = JOBS.length;
+  document.getElementById('stR1').textContent = JOBS.filter(j=>j.rank===1).length;
+  document.getElementById('stRecs').textContent = records.length;
+  document.getElementById('stNew').textContent = records.filter(r=>r.status==='جديد').length;
+}
+
+/* ---- إحصاءات السجلات ---- */
+function updateRecStats(){
+  document.getElementById('rsTotal').textContent = records.length;
+  document.getElementById('rsNew').textContent = records.filter(r=>r.status==='جديد').length;
+  document.getElementById('rsOk').textContent = records.filter(r=>r.status==='مقبول').length;
+  document.getElementById('rsNo').textContent = records.filter(r=>r.status==='مرفوض').length;
+}
+
+/* ---- تصدير CSV ---- */
+function exportRecs(){
+  if(!records.length){ toast('لا توجد سجلات للتصدير', true); return; }
+  const head = ["الاسم","الهاتف","الوظيفة","الرتبة","التاريخ","الحالة"];
+  const rows = records.map(r=>[r.name,r.phone,r.jobTitle||'',RANKS[r.rank]?RANKS[r.rank].short:'',r.date||'',r.status]);
+  const csv = [head, ...rows].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rafidain-records.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('📤 تم تصدير السجلات');
+}
+
+/* ---- الرسائل (Toast) ---- */
+let toastTimer=null;
+function toast(msg, bad){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('bad', !!bad);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---- تشغيل ---- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadRecords();
+  renderJobs();
+  updateRecStats();
+});
+</script>
+</body>
+</html>
