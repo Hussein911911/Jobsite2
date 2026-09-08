@@ -23,7 +23,7 @@ const { window } = dom, doc = window.document;
 await waitFor(() => window.JobsSiteReady);
 
 const $ = s => doc.querySelector(s), $$ = s => [...doc.querySelectorAll(s)];
-const results = [], check = (n, c, x = '') => results.push(`${c ? '✅' : '❌'} ${n}${x ? ' — ' + x : ''}`);
+const results = [], check = (n, c, x = '') => { const line = `${c ? '✅' : '❌'} ${n}${x ? ' — ' + x : ''}`; results.push(line); console.log(line); };
 const fire = (el, t) => el.dispatchEvent(new window.Event(t, { bubbles: true, cancelable: true }));
 const click = el => el.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
@@ -52,7 +52,7 @@ $('#pinInput').value = 'wrong-pass';
 click($('#btnGate'));
 await wait(300);
 check('يرفض كلمة مرور خاطئة', $('#gateErr').classList.contains('show') && $('#recordsBox').style.display === 'none');
-$('#pinInput').value = 'admin123';
+$('#pinInput').value = process.env.JOBSITE_ADMIN_PASSWORD || 'admin123';
 click($('#btnGate'));
 await wait(400);
 check('يدخل بكلمة مرور السيرفر', $('#recordsBox').style.display === 'block');
@@ -61,6 +61,7 @@ check('يعرض سجل التدقيق', $$('#historyBody tr').length >= 1);
 
 /* 4) تغيير الحالة → PATCH + تدقيق في القاعدة */
 const sel = $$('#recBody [data-action="status"]')[0];
+if (!sel) { console.log('⚠️ لا توجد صفوف في جدول السجلات — توقّف الاختبار'); console.log('toast:', $('#toast').textContent, '| login-err:', $('#gateErr').textContent); window.close(); process.exit(1); }
 const applicantId = Number(sel.dataset.id);
 sel.value = '4'; fire(sel, 'change');
 await wait(400);

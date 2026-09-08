@@ -57,17 +57,24 @@ def connect() -> sqlite3.Connection:
 
 def init_db() -> None:
     """ينشئ الجداول ويعبّئ البيانات الابتدائية عند أول تشغيل."""
-    fresh = not DB_PATH.exists()
     with closing(connect()) as con:
         con.executescript((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
         con.executescript((ROOT / "db" / "seed.sql").read_text(encoding="utf-8"))
-        if fresh or not con.execute("SELECT 1 FROM users WHERE username='admin'").fetchone():
+
+        # تأكد أن حساب المدير موجود وبكلمة مرور مُهشّئة (ليست القيمة المبدئية من seed)
+        row = con.execute("SELECT * FROM users WHERE username='admin'").fetchone()
+        hashed = bool(row) and str(row["password_hash"] or "").startswith("pbkdf2$")
+        if not hashed:
             con.execute(
                 "INSERT OR REPLACE INTO users (id, username, password_hash, full_name, role, created_at)"
                 " VALUES (1, 'admin', ?, 'مدير النظام', 'admin', ?)",
                 (hash_password(ADMIN_PASSWORD), now()),
             )
+            print(f"[jobsite] تم ضبط حساب المدير admin (كلمة المرور من JOBSITE_ADMIN_PASSWORD)")
         con.commit()
+
+    if ADMIN_PASSWORD == "admin123":
+        print("[jobsite] ⚠️  تحذير: كلمة مرور المدير الافتراضية — غيّرها بـ JOBSITE_ADMIN_PASSWORD")
 
 
 def parse_setting(raw: str):
