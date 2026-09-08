@@ -1,0 +1,176 @@
+/* ============================================================
+   شركة الرافدين — موقع الوظائف (الرتب والسجلات)
+   ملف التنسيق الرئيسي
+   ============================================================ */
+
+/* ===== المتغيرات ===== */
+:root{
+  --navy:#123c5c; --navy2:#0e2f4a; --navy3:#0a2236;
+  --gold:#c9962e; --gold-dark:#a97a1e; --goldbg:#fbf3e0;
+  --green:#0e7a5f; --greenbg:#e4f4ee; --red:#b3443c; --redbg:#fbeceb;
+  --blue:#2563a8; --bluebg:#e8f0f9; --purple:#6b4fa0; --purplebg:#efe9f8;
+  --gray:#64748b; --graybg:#eef1f5;
+  --bg:#f4f7fa; --card:#fff; --line:#dfe7ee; --text:#22303c; --muted:#64748b;
+  --shadow:0 2px 12px rgba(14,47,74,.08);
+  --radius:14px;
+}
+
+/* ===== أساسيات ===== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);line-height:1.85;font-size:14.5px}
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font-family:inherit}
+.container{max-width:1100px;margin:0 auto;padding:0 18px}
+.muted{color:var(--muted);font-size:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ===== الشريط العلوي ===== */
+.pnav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:80;box-shadow:var(--shadow)}
+.pnav .in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16.5px;color:var(--navy);cursor:pointer;background:none;border:none}
+.brand .ico{width:38px;height:38px;background:var(--navy);color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.brand small{display:block;font-size:10.5px;color:var(--muted);font-weight:400}
+.pnav nav{display:flex;gap:8px}
+.navbtn{border:none;background:none;padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--muted);transition:.15s}
+.navbtn:hover{background:var(--graybg);color:var(--navy)}
+.navbtn.on{background:var(--navy);color:#fff}
+.navbtn.gold{background:var(--gold);color:#fff}
+.navbtn.gold:hover{background:var(--gold-dark)}
+
+/* ===== الهيرو ===== */
+.hero{background:linear-gradient(135deg,var(--navy3),var(--navy) 55%,#1b5683);color:#fff;padding:52px 0 46px}
+.hero h1{font-size:27px;margin-bottom:8px}
+.hero p{opacity:.93;font-size:15px;max-width:640px}
+.hero .stats{display:flex;gap:26px;margin-top:20px;flex-wrap:wrap}
+.hero .st{text-align:center}
+.hero .st b{font-size:22px;display:block;color:#ffd98a}
+.hero .st span{font-size:12px;opacity:.85}
+
+/* ===== الفلاتر ===== */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 20px}
+.filters input,.filters select{padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;background:#fff;color:var(--text)}
+.filters input{flex:1;min-width:230px}
+.filters select{min-width:180px}
+.filters input:focus,.filters select:focus{outline:none;border-color:var(--navy)}
+
+/* ===== بطاقات الوظائف ===== */
+.job-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(295px,1fr));gap:16px;margin-bottom:36px}
+.jcard{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;transition:.2s;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);position:relative}
+.jcard:hover{transform:translateY(-4px);border-color:var(--navy)}
+.jcard .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.jcard h3{font-size:16px}
+.jcard .meta{display:flex;flex-wrap:wrap;gap:7px;font-size:11.5px;color:var(--muted)}
+.jcard .meta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:2px 10px}
+.jcard .salary{font-weight:800;color:var(--navy);font-size:13px}
+.jcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:9px;border-top:1px dashed var(--line);gap:8px;flex-wrap:wrap}
+.emptystate{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:34px;text-align:center;color:var(--muted);grid-column:1/-1}
+
+/* ===== شارات الرتب ===== */
+.rbadge{font-size:10.5px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap;border:1px solid transparent;display:inline-block}
+.r1{background:var(--goldbg);color:var(--gold-dark);border-color:#e7c98a}
+.r2{background:var(--bluebg);color:var(--blue);border-color:#bcd6f0}
+.r3{background:var(--greenbg);color:var(--green);border-color:#b5e0d2}
+.r4{background:var(--purplebg);color:var(--purple);border-color:#d5c8ec}
+.r5{background:var(--graybg);color:var(--gray);border-color:#d7dde4}
+
+/* ===== أزرار ===== */
+.btn{display:inline-block;padding:10px 20px;border-radius:9px;border:none;cursor:pointer;font-size:13.5px;font-weight:700;transition:.15s;text-align:center}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy2)}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{background:var(--gold-dark)}
+.btn-sm{padding:6px 13px;font-size:11.5px;border-radius:7px}
+.btn-line{background:#fff;border:1.5px solid var(--line);color:var(--text)}
+.btn-line:hover{border-color:var(--navy);color:var(--navy)}
+.btn-danger{background:var(--redbg);color:var(--red);border:1px solid #eec9c5}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#0b6450}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* ===== تفاصيل الوظيفة + نموذج التسجيل ===== */
+.detail{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 26px;margin:16px 0 36px;box-shadow:var(--shadow)}
+.detail h1{font-size:21px;margin-bottom:8px;color:var(--navy)}
+.dmeta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
+.dmeta span{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 13px;font-size:12px;font-weight:700;color:var(--navy2)}
+.detail h4{color:var(--navy);margin:13px 0 5px;font-size:14.5px}
+.detail p{font-size:13.5px}
+.apply{background:#fff;border:1.5px solid var(--navy);border-radius:14px;padding:20px 22px;margin-top:18px}
+.apply h3{font-size:16px;margin-bottom:12px;color:var(--navy)}
+.apply label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:9px 0 4px}
+.apply input,.apply textarea{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13.5px}
+.apply input:focus,.apply textarea:focus{outline:none;border-color:var(--gold)}
+.apply .row{display:flex;gap:10px;flex-wrap:wrap}
+.apply select{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff;color:var(--text)}
+.apply select:focus{outline:none;border-color:var(--gold)}
+#jobFormBox{margin-bottom:16px}
+#panelJobs .tblwrap{margin-top:6px}
+.apply .row>div{flex:1;min-width:220px}
+.apply .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.field-error{display:none;color:var(--red);font-size:12px;margin-top:4px}
+.field-error.show{display:block}
+.apply input.invalid,.apply textarea.invalid{border-color:var(--red)}
+.closed-note{background:var(--redbg);border:1px solid #eec9c5;color:var(--red);border-radius:12px;padding:14px 16px;margin-top:18px;font-size:13px;font-weight:700;text-align:center}
+.dl-left{color:var(--green);font-weight:800}
+.dl-today{color:var(--gold-dark);font-weight:800}
+.dl-past{color:var(--red);font-weight:800}
+
+/* ===== بوابة السجلات ===== */
+.gate{min-height:50vh;display:flex;align-items:center;justify-content:center}
+.gatecard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:min(380px,92vw);box-shadow:var(--shadow);text-align:center}
+.gatecard .ico{font-size:40px}
+.gatecard h3{font-size:17px;margin:6px 0 2px}
+.gatecard p{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.gatecard input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;text-align:center;letter-spacing:4px}
+.gatecard input:focus{outline:none;border-color:var(--navy)}
+.gate-err{display:none;background:var(--redbg);color:var(--red);border-radius:8px;padding:8px;font-size:12.5px;margin-top:10px}
+.gate-err.show{display:block}
+.gate-hint{background:var(--goldbg);border-radius:9px;padding:8px;font-size:12px;color:var(--gold-dark);margin-top:13px;line-height:1.8}
+
+/* ===== لوحة السجلات ===== */
+.recstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.rcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.rcard .lb{font-size:11.5px;color:var(--muted)}
+.rcard .vl{font-size:24px;font-weight:800;color:var(--navy);margin:3px 0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px;box-shadow:var(--shadow)}
+.panel .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.panel h3{font-size:14.5px}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.8px}
+th{text-align:right;background:var(--navy);color:#fff;padding:9px 11px;font-size:11.8px;white-space:nowrap}
+td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:#f6f9fc}
+.status{font-size:11px;font-weight:800;padding:3px 11px;border-radius:20px;white-space:nowrap}
+.s-new{background:var(--bluebg);color:var(--blue)}
+.s-rev{background:var(--goldbg);color:var(--gold-dark)}
+.s-int{background:var(--purplebg);color:var(--purple)}
+.s-ok{background:var(--greenbg);color:var(--green)}
+.s-no{background:var(--redbg);color:var(--red)}
+.sels{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.sels select{padding:6px 8px;font-size:11.5px;border:1.5px solid var(--line);border-radius:7px;background:#fff;color:var(--text)}
+.sels input{padding:7px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:12.5px;background:#fff;color:var(--text)}
+.sels input:focus,.sels select:focus{outline:none;border-color:var(--navy)}
+.rankmini{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px}
+
+/* ===== الرسائل ===== */
+.toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:var(--navy);color:#fff;padding:12px 24px;border-radius:11px;font-size:13.5px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.35s;z-index:200;pointer-events:none;text-align:center;max-width:90vw}
+.toast.show{opacity:1}
+.toast.bad{background:var(--red)}
+
+/* ===== الفوتر ===== */
+.pfoot{background:var(--navy2);color:#c6d9ea;padding:32px 0 18px;margin-top:26px}
+.pfoot .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;margin-bottom:18px}
+.pfoot h4{color:#fff;margin-bottom:9px;font-size:14.5px}
+.pfoot p,.pfoot a{font-size:12.5px;color:#c6d9ea;display:block;padding:2px 0}
+.pfoot a:hover{color:#ffd98a}
+.pfoot a.link{cursor:pointer;background:none;border:none;text-align:right}
+.pfoot .bot{border-top:1px solid rgba(255,255,255,.14);padding-top:14px;text-align:center;font-size:11.5px;color:rgba(255,255,255,.6)}
+
+/* ===== الجوال ===== */
+@media(max-width:760px){
+  .pnav .in{height:auto;padding:10px 0;flex-direction:column;gap:6px}
+  .pnav nav{flex-wrap:wrap;justify-content:flex-end}
+  .hero h1{font-size:23px}
+  .detail{padding:18px 16px}
+  .hero .stats{gap:16px}
+}
