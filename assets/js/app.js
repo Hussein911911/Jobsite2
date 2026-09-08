@@ -67,10 +67,12 @@
   async function refreshStats() {
     try {
       var s = await JobsSite.db.stats();
-      u.qs('#stJobs').textContent = s.jobs_open;
-      u.qs('#stR1').textContent = s.jobs_rank1;
-      u.qs('#stRecs').textContent = s.applicants_total;
-      u.qs('#stNew').textContent = s.applicants_new;
+      /* إحصاءات السجلات ترجع null للزائر غير المُصرّح له */
+      var dash = function (v) { return (v === null || v === undefined) ? '—' : v; };
+      u.qs('#stJobs').textContent = dash(s.jobs_open);
+      u.qs('#stR1').textContent = dash(s.jobs_rank1);
+      u.qs('#stRecs').textContent = dash(s.applicants_total);
+      u.qs('#stNew').textContent = dash(s.applicants_new);
     } catch (e) {
       u.toast('تعذّر تحميل الإحصاءات: ' + e.message, false);
     }

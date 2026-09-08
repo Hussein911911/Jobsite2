@@ -34,9 +34,13 @@ Jobsite2/
 ├── docs/
 │   ├── DATABASE.md               # 🗄️ شرح النموذج والعلاقات والترحيلات
 │   └── API.md                    # 📡 عقد الـ REST للسيرفر البايثوني
+├── server/
+│   ├── app.py                    # 🐍 سيرفر مرجعي (FastAPI + SQLite)
+│   └── requirements.txt
 ├── tests/
 │   ├── smoke.test.mjs            # ✅ 43 فحص (الوضع المحلي)
-│   └── api.test.mjs              # ✅ 15 فحص (وضع السيرفر)
+│   ├── api.test.mjs              # ✅ 15 فحص (سيرفر وهمي)
+│   └── e2e.test.mjs              # ✅ 11 فحص (ضد سيرفر بايثون حقيقي)
 └── package.json
 ```
 
@@ -56,6 +60,11 @@ npm start          # أو: python3 -m http.server 8000
 ```bash
 npm install
 npm test           # 58 فحص: 43 محلي + 15 عبر سيرفر وهمي
+
+# واختبار نهاية-بنهاية ضد سيرفر بايثون حقيقي:
+pip install -r server/requirements.txt
+JOBSITE_ADMIN_PASSWORD="كلمة-قوية" uvicorn --app-dir server app:app --port 8010
+npm run test:e2e   # 11 فحص
 ```
 
 ---
@@ -119,10 +128,20 @@ apiBaseUrl: '/api',
 npm run db:init     # ينشئ jobsite.db من db/schema.sql + db/seed.sql
 ```
 
+**وسيرفر مرجعي جاهز للتجربة** في `server/app.py` (FastAPI) يطبّق العقد كاملاً
+مع هشّ لكلمات المرور وجلسات وتقييد طلبات — شغّال ومُختبَر ✅
+([server/README.md](server/README.md) · [docs/DEPLOY.md](docs/DEPLOY.md) للنشر).
+
 > ✅ `tests/api.test.mjs` يشغّل سيرفر وهمي بنفس العقد ويتأكد أن الواجهة تتحدث معه صح،
 > يعني تقدر تبدأ بايثون (Flask/FastAPI/Django) وتطابق المسارات وتجرب مباشرة.
 
 ---
+
+## 🚀 النشر
+
+قائمة التحقّق الكاملة قبل النشر (كلمات مرور، HTTPS، Postgres، نسخ احتياطي، nginx،
+استضافة Render/Railway/VPS، وربطه بموقعك الحالي Flask/Django):
+**[docs/DEPLOY.md](docs/DEPLOY.md)**
 
 ## ⚙️ التخصيص
 

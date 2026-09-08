@@ -3,3 +3,6 @@ node_modules/
 *.log
 jobsite.db
 *.sqlite3
+.venv/
+__pycache__/
+*.pyc

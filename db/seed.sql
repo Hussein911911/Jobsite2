@@ -46,10 +46,10 @@ INSERT OR IGNORE INTO status_history (id, applicant_id, from_status_id, to_statu
 /* ── users ── */
 INSERT OR IGNORE INTO users (id, username, password_hash, full_name, role, created_at, last_login_at) VALUES (1, 'admin', 'CHANGE_ME_ON_SERVER', 'مدير النظام', 'admin', '2026-08-20 09:00', '');
 
-/* ── settings ── */
-INSERT OR IGNORE INTO settings (key, value) VALUES ('site_name', 'شركة الرافدين');
+/* الإعدادات: القيمة نص JSON */
+INSERT OR IGNORE INTO settings (key, value) VALUES ('site_name', '"شركة الرافدين"');
 INSERT OR IGNORE INTO settings (key, value) VALUES ('contact', '{"phone": "0780 123 4567", "email": "hr@alrafidain-iq.com", "address": "بغداد — المنصور، شارع 14 رمضان"}');
-INSERT OR IGNORE INTO settings (key, value) VALUES ('applications_open', 1);
+INSERT OR IGNORE INTO settings (key, value) VALUES ('applications_open', 'true');
 
 /* ⚠️ غيّر password_hash على السيرفر فوراً:
-   UPDATE users SET password_hash = '<bcrypt hash>' WHERE username = 'admin'; */
+   UPDATE users SET password_hash = '<bcrypt/pbkdf2 hash>' WHERE username = 'admin'; */

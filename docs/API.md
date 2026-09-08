@@ -46,7 +46,7 @@ apiBaseUrl: '/api',
 | `q` | `محاسب` | بحث في العنوان/القسم/المكان/الوصف |
 | `rank_id` | `1` | فلترة بالرتبة |
 | `active` | `1` | `1` المفتوحة فقط، `0` المغلقة فقط |
-| `limit` / `offset` | `50` / `0` | ترقيم الصفحات |
+| `limit` / `offset` | `50` / `0` | ترقيم الصفحات — **`limit=0` تعني "بدون حد" (الكل)** |
 
 ```json
 [{ "id": 1, "rank_id": 1, "title": "مدير فرع بغداد", "dept": "الإدارة العامة",
@@ -76,7 +76,7 @@ ORDER BY rank_id, id LIMIT :limit OFFSET :offset;
 | `q` | بحث بالاسم/الهاتف/البريد/الملاحظات |
 | `job_id` · `status_id` · `rank_id` | فلترة |
 | `order` | `newest` (افتراضي) أو `oldest` |
-| `limit` / `offset` | ترقيم |
+| `limit` / `offset` | ترقيم — `limit=0` ⇒ الكل |
 
 يُفضّل إرجاع الصفوف مربوطة (join):
 
@@ -125,6 +125,9 @@ ORDER BY a.id DESC LIMIT :limit OFFSET :offset;
 ## 4) الإحصاءات والتصدير
 
 ### `GET /api/stats`
+**عام** — يرجّع إحصاءات الوظائف للجميع، وإحصاءات السجلات (`applicants_*`, `by_status`)
+للمدير فقط (غير المُصرّح له يستلمها `null`).
+
 ```json
 { "jobs_total": 10, "jobs_open": 9, "jobs_rank1": 1,
   "applicants_total": 5, "applicants_new": 1, "applicants_accepted": 1, "applicants_rejected": 1,
@@ -162,6 +165,17 @@ ORDER BY a.id DESC LIMIT :limit OFFSET :offset;
 | `POST /api/admin/reset` | استعادة البيانات الابتدائية (مدير فقط) |
 
 ---
+
+## 7) سيرفر مرجعي جاهز
+
+موجود في `server/app.py` (FastAPI + SQLite) يطبّق هذا العقد كاملاً:
+
+```bash
+pip install -r server/requirements.txt
+JOBSITE_ADMIN_PASSWORD="كلمة-قوية" uvicorn --app-dir server app:app --port 8010
+```
+
+طريقة النشر والبدائل (Flask/Django/VPS/استضافة): [`docs/DEPLOY.md`](DEPLOY.md)
 
 ## ✅ قائمة تحقّق للسيرفر
 
