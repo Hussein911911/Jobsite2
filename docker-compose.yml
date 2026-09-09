@@ -1,0 +1,16 @@
+services:
+  alfayd:
+    build: .
+    ports:
+      - "8010:8010"
+    environment:
+      ALFAYD_ADMIN_PASSWORD: ${ALFAYD_ADMIN_PASSWORD:-1234}
+      ALFAYD_STAFF_PASSWORD: ${ALFAYD_STAFF_PASSWORD:-1234}
+      ALFAYD_DB: /data/alfayd.db
+      ALFAYD_COOKIE_SECURE: ${ALFAYD_COOKIE_SECURE:-0}
+    volumes:
+      - alfayd-data:/data
+    restart: unless-stopped
+
+volumes:
+  alfayd-data:

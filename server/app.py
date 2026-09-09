@@ -1,580 +1,559 @@
 """
-╔══════════════════════════════════════════════════════════════╗
-║  سيرفر مرجعي لموقع وظائف شركة الرافدين (FastAPI + SQLite)     ║
-║  يطبّق العقد الموجود في docs/API.md ويقدّم ملفات الواجهة.      ║
-║                                                              ║
-║  التشغيل:                                                    ║
-║     pip install -r requirements.txt                          ║
-║     uvicorn app:app --reload --host 0.0.0.0 --port 8000      ║
-║                                                              ║
-║  ملاحظة: هذا سيرفر مرجعي/نموذجي — طوّعه على موقعك البايثوني.  ║
-╚══════════════════════════════════════════════════════════════╝
+نظام مكتب الفيض الدوائي العلمي — واجهة REST + جلسة آمنة + SQLite.
 """
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 import os
-import re
 import secrets
 import sqlite3
 import time
-from contextlib import closing
-from datetime import datetime
+from collections import defaultdict, deque
+from contextlib import contextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.sessions import SessionMiddleware
+from pydantic import BaseModel, Field
 
-# ═══════════════ الإعدادات ═══════════════
-ROOT = Path(__file__).resolve().parent.parent          # جذر المشروع
-DB_PATH = Path(os.getenv("JOBSITE_DB", ROOT / "jobsite.db"))
-SECRET_KEY = os.getenv("JOBSITE_SECRET", "change-me-in-production-" + secrets.token_hex(8))
-ADMIN_PASSWORD = os.getenv("JOBSITE_ADMIN_PASSWORD", "admin123")   # ⚠️ غيّره
-RATE_LIMIT = int(os.getenv("JOBSITE_RATE_LIMIT", "5"))             # طلبات تقديم
-RATE_WINDOW = int(os.getenv("JOBSITE_RATE_WINDOW", "600"))         # خلال ثانية
+from server import seed as seedmod
 
-PHONE_RE = re.compile(r"^0[3579]\d{9}$")
-EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$")
-MAX_NOTES = 500
+ROOT = Path(__file__).resolve().parent.parent
+SCHEMA_PATH = ROOT / "db" / "schema.sql"
+DIST_DIR = ROOT / "dist"
+DB_PATH = Path(os.environ.get("ALFAYD_DB", str(ROOT / "data" / "alfayd.db")))
+COOKIE = "alfayd_session"
+SESSION_DAYS = 7
+COOKIE_SECURE = os.environ.get("ALFAYD_COOKIE_SECURE", "").strip() in {"1", "true", "yes"}
+ADMIN_PASSWORD = os.environ.get("ALFAYD_ADMIN_PASSWORD", "1234")
+STAFF_PASSWORD = os.environ.get("ALFAYD_STAFF_PASSWORD", "1234")
+PBKDF2_ROUNDS = 120_000
 
-app = FastAPI(title="موقع وظائف شركة الرافدين", version="2.0.0")
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, session_cookie="jobsite_session")
+app = FastAPI(title="مكتب الفيض الدوائي العلمي", version="2.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https://.*\.e2b\.app|https://.*\.arena\.|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+_login_hits: dict[str, deque] = defaultdict(deque)
 
 
-# ═══════════════ قاعدة البيانات ═══════════════
-def connect() -> sqlite3.Connection:
-    """اتصال جديد — يُغلق دائماً عبر contextlib.closing لتجنّب قفل قاعدة البيانات."""
-    con = sqlite3.connect(DB_PATH, timeout=15)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA foreign_keys = ON")
-    con.execute("PRAGMA journal_mode = WAL")
-    return con
+# ---------------------------------------------------------------------------
+# كلمات المرور والجلسات
+# ---------------------------------------------------------------------------
+
+def hash_password(password: str, salt: str | None = None) -> str:
+    salt = salt or secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), PBKDF2_ROUNDS)
+    return f"pbkdf2${salt}${dk.hex()}"
+
+
+def verify_password(password: str, stored: str) -> bool:
+    try:
+        algo, salt, _hex = stored.split("$", 2)
+    except ValueError:
+        return False
+    if algo != "pbkdf2":
+        return False
+    return secrets.compare_digest(hash_password(password, salt), stored)
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _rate_ok(ip: str, limit: int = 12, window: int = 300) -> bool:
+    now = time.time()
+    q = _login_hits[ip]
+    while q and now - q[0] > window:
+        q.popleft()
+    if len(q) >= limit:
+        return False
+    q.append(now)
+    return True
+
+
+# ---------------------------------------------------------------------------
+# قاعدة البيانات
+# ---------------------------------------------------------------------------
+
+def _connect() -> sqlite3.Connection:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH), timeout=30)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
+    return conn
+
+
+@contextmanager
+def db():
+    conn = _connect()
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def init_db() -> None:
-    """ينشئ الجداول ويعبّئ البيانات الابتدائية عند أول تشغيل."""
-    with closing(connect()) as con:
-        con.executescript((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
-        con.executescript((ROOT / "db" / "seed.sql").read_text(encoding="utf-8"))
-
-        # تأكد أن حساب المدير موجود وبكلمة مرور مُهشّئة (ليست القيمة المبدئية من seed)
-        row = con.execute("SELECT * FROM users WHERE username='admin'").fetchone()
-        hashed = bool(row) and str(row["password_hash"] or "").startswith("pbkdf2$")
-        if not hashed:
-            con.execute(
-                "INSERT OR REPLACE INTO users (id, username, password_hash, full_name, role, created_at)"
-                " VALUES (1, 'admin', ?, 'مدير النظام', 'admin', ?)",
-                (hash_password(ADMIN_PASSWORD), now()),
+    schema = SCHEMA_PATH.read_text(encoding="utf-8")
+    with db() as conn:
+        conn.executescript(schema)
+        n = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        if n == 0:
+            conn.execute(
+                "INSERT INTO users(username, password_hash, name, role) VALUES (?,?,?,?)",
+                ("admin", hash_password(ADMIN_PASSWORD), "أحمد الفيض", "مدير النظام"),
             )
-            print(f"[jobsite] تم ضبط حساب المدير admin (كلمة المرور من JOBSITE_ADMIN_PASSWORD)")
-        con.commit()
-
-    if ADMIN_PASSWORD == "admin123":
-        print("[jobsite] ⚠️  تحذير: كلمة مرور المدير الافتراضية — غيّرها بـ JOBSITE_ADMIN_PASSWORD")
-
-
-def parse_setting(raw: str):
-    """قيمة الإعداد مخزّنة كنص JSON — وإن لم تكن كذلك نُرجعها كما هي."""
-    try:
-        return json.loads(raw)
-    except Exception:
-        return raw
+            conn.execute(
+                "INSERT INTO users(username, password_hash, name, role) VALUES (?,?,?,?)",
+                ("staff", hash_password(STAFF_PASSWORD), "سارة كريم", "موظفة مبيعات"),
+            )
+        n_med = conn.execute("SELECT COUNT(*) FROM medicines").fetchone()[0]
+        if n_med == 0:
+            _write_snapshot(conn, seedmod.snapshot())
 
 
-def now() -> str:
-    return datetime.now().strftime("%Y-%m-%d %H:%M")
-
-
-# ═══════════════ كلمات المرور ═══════════════
-def hash_password(pw: str, salt: bytes | None = None) -> str:
-    """PBKDF2-SHA256 من مكتبة بايثون القياسية (استبدلها بـ bcrypt/argon2 إن أردت)."""
-    salt = salt or secrets.token_bytes(16)
-    dk = hashlib.pbkdf2_hmac("sha256", pw.encode(), salt, 200_000)
-    return f"pbkdf2$200000${salt.hex()}${dk.hex()}"
-
-
-def verify_password(pw: str, stored: str) -> bool:
-    try:
-        algo, rounds, salt_hex, hash_hex = stored.split("$")
-        if algo != "pbkdf2":
-            return False
-        dk = hashlib.pbkdf2_hmac("sha256", pw.encode(), bytes.fromhex(salt_hex), int(rounds))
-        return hmac.compare_digest(dk.hex(), hash_hex)
-    except Exception:
-        return False
-
-
-# ═══════════════ الصلاحيات وتقييد الطلبات ═══════════════
-def require_admin(request: Request) -> None:
-    if not request.session.get("user"):
-        raise HTTPException(401, "غير مصرّح — سجّل الدخول")
-
-
-_hits: dict[str, list[float]] = {}
-
-
-def rate_limit(request: Request, key: str, limit: int = RATE_LIMIT, window: int = RATE_WINDOW) -> None:
-    ip = request.client.host if request.client else "unknown"
-    k = f"{key}:{ip}"
-    t = time.time()
-    _hits[k] = [x for x in _hits.get(k, []) if t - x < window]
-    if len(_hits[k]) >= limit:
-        raise HTTPException(429, "طلبات كثيرة — حاول بعد قليل")
-    _hits[k].append(t)
-
-
-# ═══════════════ التحقق من المدخلات ═══════════════
-def normalize_phone(p: str) -> str:
-    p = re.sub(r"[\s\-()]", "", p or "")
-    if p.startswith("+964"):
-        p = "0" + p[4:]
-    elif p.startswith("00964"):
-        p = "0" + p[5:]
-    return p
-
-
-def validate_applicant(data: dict) -> dict:
-    full_name = (data.get("full_name") or "").strip()
-    phone = normalize_phone(data.get("phone") or "")
-    email = (data.get("email") or "").strip()
-    notes = (data.get("notes") or "").strip()[:MAX_NOTES]
-    job_id = data.get("job_id")
-
-    if len(full_name) < 3:
-        raise HTTPException(400, "الاسم مطلوب (٣ أحرف على الأقل)")
-    if not PHONE_RE.match(phone):
-        raise HTTPException(400, "رقم هاتف عراقي صحيح: 07xxxxxxxxxx")
-    if email and not EMAIL_RE.match(email):
-        raise HTTPException(400, "البريد الإلكتروني غير صحيح")
-    if not job_id:
-        raise HTTPException(400, "الوظيفة مطلوبة")
-    return {"job_id": int(job_id), "full_name": full_name, "phone": phone, "email": email, "notes": notes}
-
-
-# ═══════════════ التهيئة ═══════════════
 @app.on_event("startup")
-def on_startup() -> None:
+def _startup() -> None:
     init_db()
 
 
-# ═══════════════ 1) التهيئة ═══════════════
-@app.get("/api/bootstrap")
-def bootstrap():
-    """يرسل الجداول الثابتة للواجهة عند التشغيل."""
-    with closing(connect()) as con:
-        tables = {
-            "ranks": [dict(r) for r in con.execute("SELECT * FROM ranks ORDER BY level")],
-            "statuses": [dict(r) for r in con.execute("SELECT * FROM statuses ORDER BY sort_order")],
-            "settings": [{"key": r["key"], "value": parse_setting(r["value"])} for r in con.execute("SELECT * FROM settings")],
-        }
-    return {"schema_version": 2, "tables": tables}
+# ---------------------------------------------------------------------------
+# تحويل الصفوف ↔ JSON الواجهة
+# ---------------------------------------------------------------------------
+
+def _medicine_out(r: sqlite3.Row) -> dict:
+    return {
+        "id": r["id"],
+        "name": r["name"],
+        "scientific": r["scientific"],
+        "category": r["category"],
+        "form": r["form"],
+        "strength": r["strength"],
+        "batch": r["batch"],
+        "prodDate": r["prod_date"],
+        "expiry": r["expiry"],
+        "qty": r["qty"],
+        "minQty": r["min_qty"],
+        "buyPrice": r["buy_price"],
+        "sellPrice": r["sell_price"],
+        "company": r["company"],
+        "stripsPerPiece": r["strips_per_piece"],
+        "piecesPerCarton": r["pieces_per_carton"],
+        "createdAt": r["created_at"],
+    }
 
 
-# ═══════════════ 2) الوظائف ═══════════════
-@app.get("/api/jobs")
-def list_jobs(
-    q: str = "", rank_id: int | None = None, active: int | None = None,
-    limit: int = 50, offset: int = 0,
-):
-    sql = """SELECT j.*, r.short AS rank_short, r.name AS rank_name,
-                    (SELECT COUNT(*) FROM applicants a WHERE a.job_id = j.id) AS applicants_count
-             FROM jobs j LEFT JOIN ranks r ON r.id = j.rank_id
-             WHERE 1=1"""
-    args: list = []
-    if rank_id:
-        sql += " AND j.rank_id = ?"
-        args.append(rank_id)
-    if active is not None:
-        today = datetime.now().strftime("%Y-%m-%d")
-        if active == 1:
-            sql += " AND j.is_active = 1 AND (j.deadline IS NULL OR j.deadline = '' OR j.deadline >= ?)"
-        else:
-            sql += " AND (j.is_active = 0 OR (j.deadline IS NOT NULL AND j.deadline != '' AND j.deadline < ?))"
-        args.append(today)
-    if q:
-        sql += " AND (j.title LIKE ? OR j.dept LIKE ? OR j.location LIKE ? OR j.description LIKE ?)"
-        args += [f"%{q}%"] * 4
-    sql += " ORDER BY j.rank_id, j.id"
-    if limit and limit > 0:                      # limit=0 أو أقل ⇒ بدون حد (الكل)
-        sql += " LIMIT ? OFFSET ?"
-        args += [limit, offset]
-
-    with closing(connect()) as con:
-        return [dict(r) for r in con.execute(sql, args)]
+def _customer_out(r: sqlite3.Row) -> dict:
+    return {
+        "id": r["id"],
+        "name": r["name"],
+        "kind": r["kind"],
+        "phone": r["phone"],
+        "city": r["city"],
+        "createdAt": r["created_at"],
+    }
 
 
-def validate_job(data: dict, partial: bool = False) -> dict:
-    """يتحقق من حقول الوظيفة (partial=True للتعديل الجزئي)."""
-    out: dict = {}
-    title = data.get("title")
-    if title is not None or not partial:
-        title = (title or "").strip()
-        if len(title) < 3:
-            raise HTTPException(400, "عنوان الوظيفة مطلوب (٣ أحرف على الأقل)")
-        out["title"] = title
-
-    if "rank_id" in data or not partial:
-        rank_id = int(data.get("rank_id") or 0)
-        with closing(connect()) as con:
-            if not con.execute("SELECT 1 FROM ranks WHERE id = ?", (rank_id,)).fetchone():
-                raise HTTPException(400, "الرتبة غير صحيحة")
-        out["rank_id"] = rank_id
-
-    for field, maxlen in (("dept", 100), ("location", 100), ("employment_type", 50),
-                          ("salary_text", 100), ("description", 4000), ("requirements", 4000)):
-        if field in data or not partial:
-            out[field] = (str(data.get(field) or ("—" if field in ("dept", "location", "employment_type") else "")))[:maxlen]
-
-    for field in ("salary_min", "salary_max"):
-        if field in data or not partial:
-            v = data.get(field)
-            out[field] = int(v) if v not in (None, "", 0) else None
-
-    if out.get("salary_min") and out.get("salary_max") and out["salary_min"] > out["salary_max"]:
-        raise HTTPException(400, "الحد الأدنى للراتب أكبر من الأعلى")
-
-    if "deadline" in data or not partial:
-        dl = (str(data.get("deadline") or "")).strip()
-        if dl:
-            try:
-                datetime.strptime(dl, "%Y-%m-%d")
-            except ValueError:
-                raise HTTPException(400, "تاريخ آخر موعد غير صحيح (YYYY-MM-DD)")
-        out["deadline"] = dl
-
-    if "is_active" in data or not partial:
-        out["is_active"] = 1 if data.get("is_active") in (1, True, "1", "true") else 0
-    return out
-
-
-@app.post("/api/jobs", status_code=201)
-def create_job(request: Request, data: dict):
-    """إضافة وظيفة (مدير فقط)."""
-    require_admin(request)
-    d = validate_job(data)
-    with closing(connect()) as con:
-        cur = con.execute(
-            "INSERT INTO jobs (rank_id, title, dept, location, employment_type, salary_text,"
-            " salary_min, salary_max, deadline, description, requirements, is_active, created_at, updated_at)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            (d["rank_id"], d["title"], d["dept"], d["location"], d["employment_type"],
-             d["salary_text"], d.get("salary_min"), d.get("salary_max"), d["deadline"],
-             d["description"], d["requirements"], d["is_active"], now(), now()),
-        )
-        con.commit()
-        row = con.execute("SELECT * FROM jobs WHERE id = ?", (cur.lastrowid,)).fetchone()
-    return dict(row)
-
-
-@app.get("/api/jobs/{job_id}")
-def get_job(job_id: int):
-    with closing(connect()) as con:
-        row = con.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
-    if not row:
-        raise HTTPException(404, "الوظيفة غير موجودة")
-    return dict(row)
-
-
-@app.patch("/api/jobs/{job_id}")
-def update_job(request: Request, job_id: int, data: dict):
-    """تعديل وظيفة (مدير فقط) — يقبل حقول جزئية."""
-    require_admin(request)
-    d = validate_job(data, partial=True)
-    if not d:
-        raise HTTPException(400, "لا توجد حقول للتعديل")
-    with closing(connect()) as con:
-        if not con.execute("SELECT 1 FROM jobs WHERE id = ?", (job_id,)).fetchone():
-            raise HTTPException(404, "الوظيفة غير موجودة")
-        sets = ", ".join(f"{k} = ?" for k in d)
-        con.execute(f"UPDATE jobs SET {sets}, updated_at = ? WHERE id = ?", (*d.values(), now(), job_id))
-        con.commit()
-        row = con.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
-    return dict(row)
-
-
-@app.delete("/api/jobs/{job_id}", status_code=204)
-def delete_job(request: Request, job_id: int):
-    """حذف وظيفة (مدير فقط) — يمسح سجلاتها تلقائياً عبر ON DELETE CASCADE."""
-    require_admin(request)
-    with closing(connect()) as con:
-        res = con.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
-        con.commit()
-    if res.rowcount == 0:
-        raise HTTPException(404, "الوظيفة غير موجودة")
-    return Response(status_code=204)
-
-
-# ═══════════════ 3) المتقدمون ═══════════════
-@app.get("/api/applicants")
-def list_applicants(
-    request: Request,
-    q: str = "", job_id: int | None = None, status_id: int | None = None,
-    rank_id: int | None = None, order: str = "newest",
-    limit: int = 50, offset: int = 0,
-):
-    require_admin(request)
-    sql = """SELECT a.*, j.id AS job_id, j.title AS job_title, j.rank_id,
-                    r.short AS rank_short, r.name AS rank_name,
-                    s.id AS status_id, s.name AS status_name, s.slug AS status_slug, s.css_class AS status_class
-             FROM applicants a
-             LEFT JOIN jobs j  ON j.id = a.job_id
-             LEFT JOIN ranks r ON r.id = j.rank_id
-             LEFT JOIN statuses s ON s.id = a.status_id
-             WHERE 1=1"""
-    args: list = []
-    if job_id:
-        sql += " AND a.job_id = ?"
-        args.append(job_id)
-    if status_id:
-        sql += " AND a.status_id = ?"
-        args.append(status_id)
-    if rank_id:
-        sql += " AND j.rank_id = ?"
-        args.append(rank_id)
-    if q:
-        sql += " AND (a.full_name LIKE ? OR a.phone LIKE ? OR a.email LIKE ? OR a.notes LIKE ?)"
-        args += [f"%{q}%"] * 4
-    sql += " ORDER BY a.id " + ("ASC" if order == "oldest" else "DESC")
-    if limit and limit > 0:
-        sql += " LIMIT ? OFFSET ?"
-        args += [limit, offset]
-
-    with closing(connect()) as con:
-        rows = [dict(r) for r in con.execute(sql, args)]
-
-    # نفس شكل الربط (join) المتوقع في docs/API.md
-    out = []
-    for r in rows:
-        out.append({
-            **r,
-            "job": {"id": r.get("job_id"), "title": r.get("job_title"), "rank_id": r.get("rank_id")} if r.get("job_id") else None,
-            "status": {"id": r.get("status_id"), "name": r.get("status_name"),
-                       "slug": r.get("status_slug"), "css_class": r.get("status_class")},
-        })
-    return out
-
-
-@app.post("/api/applicants", status_code=201)
-def create_applicant(request: Request, data: dict):
-    """تقديم عام — بدون صلاحية، مع تحقق وتقييد طلبات."""
-    rate_limit(request, "apply")
-    d = validate_applicant(data)
-
-    with closing(connect()) as con:
-        job = con.execute("SELECT * FROM jobs WHERE id = ?", (d["job_id"],)).fetchone()
-        if not job:
-            raise HTTPException(400, "الوظيفة غير موجودة")
-        if job["is_active"] != 1:
-            raise HTTPException(400, "التقديم على هذه الوظيفة مغلق")
-        if job["deadline"] and job["deadline"] < datetime.now().strftime("%Y-%m-%d"):
-            raise HTTPException(400, "انتهى موعد التقديم")
-
+def _invoice_item_out(r: sqlite3.Row) -> dict:
+    item = {
+        "medicineId": r["medicine_id"],
+        "name": r["name"],
+        "strength": r["strength"],
+        "unit": r["unit"],
+        "qty": r["qty"],
+        "strips": r["strips"],
+        "price": r["price"],
+        "cost": r["cost"],
+        "discountPct": r["discount_pct"],
+        "total": r["total"],
+    }
+    if r["lines_json"]:
         try:
-            cur = con.execute(
-                "INSERT INTO applicants (job_id, full_name, phone, email, notes, status_id, applied_at, updated_at)"
-                " VALUES (?,?,?,?,?,1,?,?)",
-                (d["job_id"], d["full_name"], d["phone"], d["email"], d["notes"], now(), now()),
+            item["lines"] = json.loads(r["lines_json"])
+        except json.JSONDecodeError:
+            pass
+    return item
+
+
+def _invoice_out(conn: sqlite3.Connection, r: sqlite3.Row) -> dict:
+    items = conn.execute(
+        "SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id", (r["id"],)
+    ).fetchall()
+    out = {
+        "id": r["id"],
+        "number": r["number"],
+        "date": r["date"],
+        "customerId": r["customer_id"],
+        "customer": r["customer"],
+        "payment": r["payment"],
+        "settled": bool(r["settled"]),
+        "approved": bool(r["approved"]),
+        "items": [_invoice_item_out(i) for i in items],
+        "total": r["total"],
+    }
+    if r["prep_time"]:
+        out["prepTime"] = r["prep_time"]
+    if r["sale_time"]:
+        out["saleTime"] = r["sale_time"]
+    if r["list_date"]:
+        out["listDate"] = r["list_date"]
+    if r["prepared_by"]:
+        out["preparedBy"] = r["prepared_by"]
+    if r["notes"]:
+        out["notes"] = r["notes"]
+    return out
+
+
+def _purchase_out(conn: sqlite3.Connection, r: sqlite3.Row) -> dict:
+    items = conn.execute(
+        "SELECT * FROM purchase_items WHERE purchase_id = ? ORDER BY id", (r["id"],)
+    ).fetchall()
+    return {
+        "id": r["id"],
+        "number": r["number"],
+        "date": r["date"],
+        "company": r["company"],
+        "total": r["total"],
+        "received": bool(r["received"]),
+        "items": [
+            {
+                "medicineId": i["medicine_id"],
+                "name": i["name"],
+                "strength": i["strength"],
+                "qty": i["qty"],
+                "cost": i["cost"],
+            }
+            for i in items
+        ],
+    }
+
+
+def _read_snapshot(conn: sqlite3.Connection) -> dict:
+    meds = [_medicine_out(r) for r in conn.execute("SELECT * FROM medicines ORDER BY created_at DESC, name")]
+    custs = [_customer_out(r) for r in conn.execute("SELECT * FROM customers ORDER BY created_at DESC, name")]
+    invoices = [_invoice_out(conn, r) for r in conn.execute("SELECT * FROM invoices ORDER BY number DESC")]
+    purchases = [_purchase_out(conn, r) for r in conn.execute("SELECT * FROM purchases ORDER BY number DESC")]
+    return {"medicines": meds, "customers": custs, "invoices": invoices, "purchases": purchases}
+
+
+def _as_int(v, default=0) -> int:
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def _as_float(v, default=0.0) -> float:
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def _write_snapshot(conn: sqlite3.Connection, data: dict) -> None:
+    medicines = data.get("medicines") or []
+    customers = data.get("customers") or []
+    invoices = data.get("invoices") or []
+    purchases = data.get("purchases") or []
+    if not isinstance(medicines, list) or not isinstance(customers, list):
+        raise HTTPException(400, "صيغة البيانات غير صالحة")
+    if not isinstance(invoices, list) or not isinstance(purchases, list):
+        raise HTTPException(400, "صيغة البيانات غير صالحة")
+
+    conn.execute("DELETE FROM invoice_items")
+    conn.execute("DELETE FROM invoices")
+    conn.execute("DELETE FROM purchase_items")
+    conn.execute("DELETE FROM purchases")
+    conn.execute("DELETE FROM medicines")
+    conn.execute("DELETE FROM customers")
+
+    for m in medicines:
+        if not isinstance(m, dict) or not m.get("id") or not str(m.get("name", "")).strip():
+            continue
+        conn.execute(
+            """INSERT INTO medicines(
+                id, name, scientific, category, form, strength, batch, prod_date, expiry,
+                qty, min_qty, buy_price, sell_price, company, strips_per_piece, pieces_per_carton, created_at
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                str(m["id"]),
+                str(m.get("name", "")).strip(),
+                str(m.get("scientific", "")),
+                str(m.get("category", "")),
+                str(m.get("form", "")),
+                str(m.get("strength", "")),
+                str(m.get("batch", "")),
+                str(m.get("prodDate", "")),
+                str(m.get("expiry", "")),
+                max(0, _as_int(m.get("qty"))),
+                max(0, _as_int(m.get("minQty"))),
+                max(0, _as_int(m.get("buyPrice"))),
+                max(0, _as_int(m.get("sellPrice"))),
+                str(m.get("company", "")),
+                max(1, _as_int(m.get("stripsPerPiece"), 1)),
+                max(1, _as_int(m.get("piecesPerCarton"), 1)),
+                _as_int(m.get("createdAt"), int(time.time() * 1000)),
+            ),
+        )
+
+    for c in customers:
+        if not isinstance(c, dict) or not c.get("id") or not str(c.get("name", "")).strip():
+            continue
+        kind = c.get("kind") if c.get("kind") in ("pharmacy", "warehouse") else "pharmacy"
+        conn.execute(
+            "INSERT INTO customers(id, name, kind, phone, city, created_at) VALUES (?,?,?,?,?,?)",
+            (
+                str(c["id"]),
+                str(c.get("name", "")).strip(),
+                kind,
+                str(c.get("phone", "")),
+                str(c.get("city", "") or "غير محددة"),
+                _as_int(c.get("createdAt"), int(time.time() * 1000)),
+            ),
+        )
+
+    for inv in invoices:
+        if not isinstance(inv, dict) or not inv.get("id"):
+            continue
+        conn.execute(
+            """INSERT INTO invoices(
+                id, number, date, customer_id, customer, payment, settled, approved,
+                prep_time, sale_time, list_date, prepared_by, notes, total
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (
+                str(inv["id"]),
+                _as_int(inv.get("number")),
+                str(inv.get("date") or ""),
+                str(inv.get("customerId") or ""),
+                str(inv.get("customer") or ""),
+                "آجل" if inv.get("payment") == "آجل" else "نقدي",
+                1 if inv.get("settled") else 0,
+                0 if inv.get("approved") is False else 1,
+                inv.get("prepTime"),
+                inv.get("saleTime"),
+                inv.get("listDate"),
+                inv.get("preparedBy"),
+                inv.get("notes"),
+                max(0, _as_int(inv.get("total"))),
+            ),
+        )
+        for it in inv.get("items") or []:
+            if not isinstance(it, dict):
+                continue
+            lines = it.get("lines")
+            conn.execute(
+                """INSERT INTO invoice_items(
+                    invoice_id, medicine_id, name, strength, unit, qty, strips,
+                    price, cost, discount_pct, total, lines_json
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    str(inv["id"]),
+                    str(it.get("medicineId") or ""),
+                    str(it.get("name") or ""),
+                    str(it.get("strength") or ""),
+                    "strip" if it.get("unit") == "strip" else "piece",
+                    max(0, _as_int(it.get("qty"))),
+                    max(0, _as_int(it.get("strips"))),
+                    max(0, _as_int(it.get("price"))),
+                    max(0, _as_int(it.get("cost"))),
+                    max(0.0, min(100.0, _as_float(it.get("discountPct")))),
+                    max(0, _as_int(it.get("total"))),
+                    json.dumps(lines, ensure_ascii=False) if isinstance(lines, list) else None,
+                ),
             )
-        except sqlite3.IntegrityError:
-            raise HTTPException(409, "DUPLICATE")
 
-        applicant_id = cur.lastrowid
-        con.execute(
-            "INSERT INTO status_history (applicant_id, from_status_id, to_status_id, changed_at, changed_by, note)"
-            " VALUES (?,NULL,1,?,'public','تقديم جديد')",
-            (applicant_id, now()),
+    for p in purchases:
+        if not isinstance(p, dict) or not p.get("id"):
+            continue
+        conn.execute(
+            "INSERT INTO purchases(id, number, date, company, total, received) VALUES (?,?,?,?,?,?)",
+            (
+                str(p["id"]),
+                _as_int(p.get("number")),
+                str(p.get("date") or ""),
+                str(p.get("company") or ""),
+                max(0, _as_int(p.get("total"))),
+                1 if p.get("received") else 0,
+            ),
         )
-        con.commit()
-        row = con.execute("SELECT * FROM applicants WHERE id = ?", (applicant_id,)).fetchone()
-    return dict(row)
+        for it in p.get("items") or []:
+            if not isinstance(it, dict):
+                continue
+            conn.execute(
+                """INSERT INTO purchase_items(purchase_id, medicine_id, name, strength, qty, cost)
+                   VALUES (?,?,?,?,?,?)""",
+                (
+                    str(p["id"]),
+                    str(it.get("medicineId") or ""),
+                    str(it.get("name") or ""),
+                    str(it.get("strength") or ""),
+                    max(0, _as_int(it.get("qty"))),
+                    max(0, _as_int(it.get("cost"))),
+                ),
+            )
 
 
-@app.patch("/api/applicants/{applicant_id}")
-def update_applicant(request: Request, applicant_id: int, data: dict):
-    """تغيير الحالة (الواجهة تستدعي هذا المسار)."""
-    require_admin(request)
-    status_id = data.get("status_id")
-    note = (data.get("note") or "")[:MAX_NOTES]
-    if not status_id:
-        raise HTTPException(400, "status_id مطلوب")
+# ---------------------------------------------------------------------------
+# المصادقة
+# ---------------------------------------------------------------------------
 
-    with closing(connect()) as con:
-        row = con.execute("SELECT * FROM applicants WHERE id = ?", (applicant_id,)).fetchone()
-        if not row:
-            raise HTTPException(404, "السجل غير موجود")
-        if not con.execute("SELECT 1 FROM statuses WHERE id = ?", (status_id,)).fetchone():
-            raise HTTPException(400, "حالة غير معروفة")
-
-        con.execute("UPDATE applicants SET status_id = ?, updated_at = ? WHERE id = ?", (status_id, now(), applicant_id))
-        con.execute(
-            "INSERT INTO status_history (applicant_id, from_status_id, to_status_id, changed_at, changed_by, note)"
-            " VALUES (?,?,?,?,?,?)",
-            (applicant_id, row["status_id"], status_id, now(),
-             request.session.get("user", "admin"), note),
-        )
-        con.commit()
-        new = con.execute("SELECT * FROM applicants WHERE id = ?", (applicant_id,)).fetchone()
-    return dict(new)
+def _user_public(row: sqlite3.Row) -> dict:
+    return {"username": row["username"], "name": row["name"], "role": row["role"]}
 
 
-@app.patch("/api/applicants/{applicant_id}/status")
-def update_status_alias(request: Request, applicant_id: int, data: dict):
-    """مسار بديل بنفس الوظيفة (مذكور في docs/API.md)."""
-    return update_applicant(request, applicant_id, data)
+def current_user(request: Request) -> dict:
+    token = request.cookies.get(COOKIE)
+    if not token:
+        raise HTTPException(401, "يلزم تسجيل الدخول")
+    now = int(time.time())
+    with db() as conn:
+        conn.execute("DELETE FROM sessions WHERE expires_at < ?", (now,))
+        row = conn.execute(
+            """SELECT u.username, u.name, u.role
+               FROM sessions s JOIN users u ON u.username = s.username
+               WHERE s.token = ? AND s.expires_at >= ?""",
+            (token, now),
+        ).fetchone()
+    if not row:
+        raise HTTPException(401, "انتهت الجلسة — سجّل الدخول مجدداً")
+    return _user_public(row)
 
 
-@app.delete("/api/applicants/{applicant_id}", status_code=204)
-def delete_applicant(request: Request, applicant_id: int):
-    require_admin(request)
-    with closing(connect()) as con:
-        res = con.execute("DELETE FROM applicants WHERE id = ?", (applicant_id,))
-        con.commit()
-    if res.rowcount == 0:
-        raise HTTPException(404, "السجل غير موجود")
-    return Response(status_code=204)
+def require_admin(user: dict) -> None:
+    if user.get("role") != "مدير النظام":
+        raise HTTPException(403, "هذه العملية للمدير فقط")
 
 
-# ═══════════════ 4) الإحصاءات والتصدير ═══════════════
-@app.get("/api/stats")
-def stats(request: Request):
-    """إحصاءات عامة للزوّار (الوظائف) + إحصاءات السجلات للمدير فقط."""
-    is_admin = bool(request.session.get("user"))
-    today = datetime.now().strftime("%Y-%m-%d")
-    with closing(connect()) as con:
-        jobs_open = con.execute(
-            "SELECT COUNT(*) c FROM jobs WHERE is_active=1 AND (deadline IS NULL OR deadline='' OR deadline>=?)", (today,)
-        ).fetchone()["c"]
-        row = lambda s: con.execute("SELECT COUNT(*) c FROM applicants WHERE status_id=?", (s,)).fetchone()["c"]
-        data = {
-            "jobs_total": con.execute("SELECT COUNT(*) c FROM jobs").fetchone()["c"],
-            "jobs_open": jobs_open,
-            "jobs_rank1": con.execute(
-                "SELECT COUNT(*) c FROM jobs WHERE rank_id=1 AND is_active=1"
-            ).fetchone()["c"],
-            "by_rank": {r["rank_id"]: r["c"] for r in con.execute(
-                "SELECT rank_id, COUNT(*) c FROM jobs GROUP BY rank_id")},
-            # ↓ إحصاءات السجلات: للمدير فقط
-            "applicants_total": None, "applicants_new": None,
-            "applicants_accepted": None, "applicants_rejected": None, "by_status": {},
-        }
-        if is_admin:
-            data.update({
-                "applicants_total": con.execute("SELECT COUNT(*) c FROM applicants").fetchone()["c"],
-                "applicants_new": row(1),
-                "applicants_accepted": row(4),
-                "applicants_rejected": row(5),
-                "by_status": {r["status_id"]: r["c"] for r in con.execute(
-                    "SELECT status_id, COUNT(*) c FROM applicants GROUP BY status_id")},
-            })
-        return data
+def _set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        COOKIE,
+        token,
+        httponly=True,
+        samesite="lax",
+        secure=COOKIE_SECURE,
+        max_age=SESSION_DAYS * 24 * 3600,
+        path="/",
+    )
 
 
-@app.get("/api/export.csv")
-def export_csv(request: Request, status_id: int | None = None, rank_id: int | None = None, q: str = ""):
-    """CSV بترميز UTF-8 مع BOM حتى يفتح صحيحاً في Excel."""
-    import csv
-    import io
-
-    rows = list_applicants(request, q=q, status_id=status_id, rank_id=rank_id, limit=100000)
-    buf = io.StringIO()
-    w = csv.writer(buf)
-    w.writerow(["#", "الاسم", "الهاتف", "البريد", "الوظيفة", "الرتبة", "الحالة", "التاريخ", "ملاحظات"])
-    for r in rows:
-        w.writerow([r["id"], r["full_name"], r["phone"], r["email"],
-                    (r["job"] or {}).get("title", ""), r.get("rank_short", ""),
-                    r["status"]["name"] if r.get("status") else "", r["applied_at"], r["notes"]])
-    return Response(content="\ufeff" + buf.getvalue(),
-                    media_type="text/csv; charset=utf-8",
-                    headers={"Content-Disposition": 'attachment; filename="applicants.csv"'}) 
+class LoginBody(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
 
 
-# ═══════════════ 5) الدخول ═══════════════
+class SnapshotBody(BaseModel):
+    medicines: list = Field(default_factory=list)
+    invoices: list = Field(default_factory=list)
+    purchases: list = Field(default_factory=list)
+    customers: list = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# المسارات
+# ---------------------------------------------------------------------------
+
+@app.get("/api/health")
+def health():
+    return {"ok": True, "name": "alfayd", "version": "2.0.0"}
+
+
 @app.post("/api/auth/login")
-def login(request: Request, data: dict):
-    rate_limit(request, "login", limit=10, window=600)
-    username = (data.get("username") or "").strip()
-    password = data.get("password") or ""
-    with closing(connect()) as con:
-        user = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-    if not user or not verify_password(password, user["password_hash"]):
-        raise HTTPException(401, "بيانات الدخول غير صحيحة")
-    with closing(connect()) as con:
-        con.execute("UPDATE users SET last_login_at = ? WHERE id = ?", (now(), user["id"]))
-        con.commit()
-    request.session["user"] = user["username"]
-    request.session["role"] = user["role"]
-    return {"ok": True, "user": {"username": user["username"], "role": user["role"]}}
+def login(body: LoginBody, request: Request, response: Response):
+    if not _rate_ok(_client_ip(request)):
+        raise HTTPException(429, "محاولات كثيرة — انتظر قليلاً ثم أعد المحاولة")
+    username = body.username.strip().lower()
+    with db() as conn:
+        row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+        if not row or not verify_password(body.password, row["password_hash"]):
+            raise HTTPException(401, "اسم المستخدم أو كلمة المرور غير صحيحة")
+        token = secrets.token_urlsafe(32)
+        expires = int(time.time()) + SESSION_DAYS * 24 * 3600
+        conn.execute(
+            "INSERT INTO sessions(token, username, expires_at) VALUES (?,?,?)",
+            (token, row["username"], expires),
+        )
+    _set_session_cookie(response, token)
+    return {"user": _user_public(row)}
 
 
 @app.post("/api/auth/logout")
-def logout(request: Request):
-    request.session.clear()
+def logout(request: Request, response: Response):
+    token = request.cookies.get(COOKIE)
+    if token:
+        with db() as conn:
+            conn.execute("DELETE FROM sessions WHERE token = ?", (token,))
+    response.delete_cookie(COOKIE, path="/")
     return {"ok": True}
 
 
-@app.get("/api/me")
+@app.get("/api/auth/me")
 def me(request: Request):
-    return {"user": request.session.get("user"), "role": request.session.get("role")}
+    return {"user": current_user(request)}
 
 
-# ═══════════════ 6) مسارات مساعدة ═══════════════
-@app.get("/api/ranks")
-def ranks():
-    with closing(connect()) as con:
-        return [dict(r) for r in con.execute("SELECT * FROM ranks ORDER BY level")]
+@app.get("/api/snapshot")
+def get_snapshot(request: Request):
+    current_user(request)
+    with db() as conn:
+        return _read_snapshot(conn)
 
 
-@app.get("/api/statuses")
-def statuses():
-    with closing(connect()) as con:
-        return [dict(r) for r in con.execute("SELECT * FROM statuses ORDER BY sort_order")]
+@app.put("/api/snapshot")
+def put_snapshot(body: SnapshotBody, request: Request):
+    current_user(request)
+    with db() as conn:
+        _write_snapshot(conn, body.model_dump())
+        return _read_snapshot(conn)
 
 
-@app.get("/api/history")
-def history(request: Request, applicant_id: int | None = None, limit: int = 20):
-    require_admin(request)
-    sql = """SELECT h.*, a.full_name AS applicant_name,
-                    sf.name AS from_status_name, st.name AS to_status_name
-             FROM status_history h
-             LEFT JOIN applicants a ON a.id = h.applicant_id
-             LEFT JOIN statuses sf ON sf.id = h.from_status_id
-             LEFT JOIN statuses st ON st.id = h.to_status_id"""
-    args: list = []
-    if applicant_id:
-        sql += " WHERE h.applicant_id = ?"
-        args.append(applicant_id)
-    sql += " ORDER BY h.id DESC LIMIT ?"
-    args.append(limit)
-    with closing(connect()) as con:
-        return [dict(r) for r in con.execute(sql, args)]
+@app.post("/api/admin/restore")
+def restore_seed(request: Request):
+    require_admin(current_user(request))
+    with db() as conn:
+        _write_snapshot(conn, seedmod.snapshot())
+        return _read_snapshot(conn)
 
 
-@app.post("/api/admin/reset")
-def reset(request: Request):
-    """استعادة البيانات الابتدائية (مدير فقط)."""
-    require_admin(request)
-    with closing(connect()) as con:
-        con.executescript("DELETE FROM status_history; DELETE FROM applicants; DELETE FROM jobs;"
-                          "DELETE FROM ranks; DELETE FROM statuses; DELETE FROM settings;")
-        con.executescript((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
-        con.executescript((ROOT / "db" / "seed.sql").read_text(encoding="utf-8"))
-        con.commit()
-    return {"ok": True, "message": "تمت استعادة البيانات الابتدائية"}
+@app.post("/api/admin/clear")
+def clear_all(request: Request):
+    require_admin(current_user(request))
+    with db() as conn:
+        _write_snapshot(conn, {"medicines": [], "invoices": [], "purchases": [], "customers": []})
+        return _read_snapshot(conn)
 
 
-# ═══════════════ الواجهة (ملفات ثابتة) ═══════════════
-app.mount("/assets", StaticFiles(directory=ROOT / "assets"), name="assets")
+# ---------------------------------------------------------------------------
+# الواجهة الأمامية (بعد البناء)
+# ---------------------------------------------------------------------------
 
+if DIST_DIR.is_dir():
+    assets = DIST_DIR / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(assets)), name="assets")
 
-@app.get("/")
-def index():
-    return FileResponse(ROOT / "index.html")
-
-
-@app.get("/health")
-def health():
-    return {"ok": True, "db": str(DB_PATH), "time": now()}
+    @app.get("/{full_path:path}")
+    def spa(full_path: str):
+        if full_path.startswith("api"):
+            raise HTTPException(404, "Not Found")
+        candidate = DIST_DIR / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        index = DIST_DIR / "index.html"
+        if index.is_file():
+            return FileResponse(index)
+        raise HTTPException(404, "Not Found")

@@ -1,18 +1,31 @@
 {
-  "name": "jobsite2",
-  "version": "1.0.0",
+  "name": "alfayd-pharma",
   "private": true,
-  "description": "موقع وظائف شركة الرافدين — نظام الرتب والسجلات بقاعدة بيانات جاهزة للربط مع سيرفر بايثون",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "نظام إدارة الأدوية — مكتب الفيض الدوائي العلمي",
   "scripts": {
-    "start": "python3 -m http.server 8000",
-    "test": "node tests/smoke.test.mjs && node tests/api.test.mjs",
-    "test:local": "node tests/smoke.test.mjs",
-    "test:api": "node tests/api.test.mjs",
-    "db:init": "python3 -c \"import sqlite3,io;c=sqlite3.connect('jobsite.db');c.executescript(open('db/schema.sql',encoding='utf-8').read());c.executescript(open('db/seed.sql',encoding='utf-8').read());print('jobsite.db جاهزة')\"",
-    "test:e2e": "node tests/e2e.test.mjs",
-    "server": "cd server && uvicorn app:app --reload --host 0.0.0.0 --port 8010"
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "server": "python3 -m uvicorn server.app:app --host 0.0.0.0 --port 8010 --reload",
+    "start": "python3 -m uvicorn server.app:app --host 0.0.0.0 --port 8010",
+    "test": "python3 tests/test_api.py"
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
-    "jsdom": "^30.0.1"
+    "@tailwindcss/vite": "4.1.17",
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3",
+    "vite": "7.3.2"
   }
 }
